@@ -1,0 +1,46 @@
+﻿@using FoodOrderApp.Models
+@using Microsoft.Graph.Models;
+@using Microsoft.Graph
+@page "/createOrder"
+
+<h3>Order</h3>
+
+<EditForm Model="@order" OnSubmit="@SubmitOrder">
+    <div>
+        Nazwa Restauracji:
+        <InputText @bind-Value="order.RestaurantName" />
+    </div>
+    <div>
+        Minimalna wartość zamówienia:
+        <InputNumber @bind-Value="order.MinCost" />
+    </div>
+    <div>
+        Koszt dostawy:
+        <InputNumber @bind-Value="order.DeliveryFee" />
+    </div>
+    <div>
+        Darmowy dowóz od:
+        <InputNumber @bind-Value="order.MinCostForFreeDelivery" />
+    </div>
+    <div>
+        Numer telefonu:
+        <InputNumber @bind-Value="order.PhoneNumber" />
+    </div>
+    <div>
+        Numer konta bankowego:
+        <InputNumber @bind-Value="order.AccountNumber" />
+    </div>
+    <div>
+        <FluentButton Type="ButtonType.Submit">Save</FluentButton>
+    </div>
+</EditForm>
+
+@code {
+    [Parameter]
+    public string UserId { get; set; }
+    OrderModel order = new OrderModel();
+    private void SubmitOrder()
+    {
+        
+    }
+}

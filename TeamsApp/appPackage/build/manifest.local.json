@@ -1,0 +1,60 @@
+{
+    "$schema": "https://developer.microsoft.com/en-us/json-schemas/teams/v1.16/MicrosoftTeams.schema.json",
+    "manifestVersion": "1.16",
+    "version": "1.0.0",
+    "id": "90dafa99-12d2-421d-b5a2-1b34691d4c11",
+    "packageName": "com.microsoft.teams.extension",
+    "developer": {
+        "name": "Teams App, Inc.",
+        "websiteUrl": "https://www.example.com",
+        "privacyUrl": "https://www.example.com/privacy",
+        "termsOfUseUrl": "https://www.example.com/termsofuse"
+    },
+    "icons": {
+        "color": "color.png",
+        "outline": "outline.png"
+    },
+    "name": {
+        "short": "FoodOrderApplocal",
+        "full": "Full name for FoodOrderApp"
+    },
+    "description": {
+        "short": "Short description of FoodOrderApp",
+        "full": "Full description of FoodOrderApp"
+    },
+    "accentColor": "#FFFFFF",
+    "bots": [],
+    "composeExtensions": [],
+    "configurableTabs": [
+        {
+            "configurationUrl": "https://localhost:44302/config",
+            "canUpdateConfiguration": true,
+            "scopes": [
+                "team",
+                "groupchat"
+            ]
+        }
+    ],
+    "staticTabs": [
+        {
+            "entityId": "index",
+            "name": "Personal Tab",
+            "contentUrl": "https://localhost:44302/tab",
+            "websiteUrl": "https://localhost:44302/tab",
+            "scopes": [
+                "personal"
+            ]
+        }
+    ],
+    "permissions": [
+        "identity",
+        "messageTeamMembers"
+    ],
+    "validDomains": [
+        "localhost:44302"
+    ],
+    "webApplicationInfo": {
+        "id": "7e440460-ab9d-4a08-8c6c-8abafe71ec12",
+        "resource": "api://localhost:44302/7e440460-ab9d-4a08-8c6c-8abafe71ec12"
+    }
+}
