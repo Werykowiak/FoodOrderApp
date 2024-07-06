@@ -12,7 +12,11 @@ builder.Services.AddTeamsFx(config.TeamsFx.Authentication);
 builder.Services.AddScoped<MicrosoftTeams>();
 
 builder.Services.AddControllers();
-builder.Services.AddHttpClient("WebClient", client => client.Timeout = TimeSpan.FromSeconds(600));
+//builder.Services.AddHttpClient("WebClient", client => client.Timeout = TimeSpan.FromSeconds(600));
+builder.Services.AddHttpClient("FoodOrderApi", client =>
+{
+    client.BaseAddress = new Uri("https://localhost:7230/");
+});
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddAntiforgery(o => o.SuppressXFrameOptionsHeader = true);
 

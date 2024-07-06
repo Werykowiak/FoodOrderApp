@@ -2,7 +2,7 @@
 @using Microsoft.Graph.Models;
 @using Microsoft.Graph
 @page "/createOrder"
-
+@inject IHttpClientFactory HttpClientFactory
 <h3>Order</h3>
 
 <EditForm Model="@order" OnSubmit="@SubmitOrder">
@@ -38,9 +38,24 @@
 @code {
     [Parameter]
     public string UserId { get; set; }
-    OrderModel order = new OrderModel();
-    private void SubmitOrder()
+    public OrderModel order = new OrderModel();
+    public string message;
+
+    private async Task SubmitOrder()
     {
-        
+        order.Orderer = UserId;
+        var httpClient = HttpClientFactory.CreateClient("FoodOrderApi");
+        var response = await httpClient.PostAsJsonAsync("api/OrderModels", order);
+        //response = await httpClient.GetAsync("api/OrderModels");
+
+        if (response.IsSuccessStatusCode)
+        {
+            message = "Item added successfully!";
+            order = new OrderModel();
+        }
+        else
+        {
+            message = "Error adding item.";
+        }
     }
 }

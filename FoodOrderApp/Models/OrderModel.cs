@@ -4,7 +4,6 @@ namespace FoodOrderApp.Models
 {
     public class OrderModel
     {
-        [Required]
         [Key]
         public int? Id { get; set; }
         public string Orderer { get; set; }
@@ -15,6 +14,7 @@ namespace FoodOrderApp.Models
         [Required]
         public double? DeliveryFee { get; set; }
         public double? MinCostForFreeDelivery { get; set; }
+        [Required]
         public int? PhoneNumber { get; set; }
         [Required]
         public int? AccountNumber { get; set; }
