@@ -1,0 +1,39 @@
+﻿@using FoodOrderApp.Models
+@inject IHttpClientFactory HttpClientFactory
+<h3>CreateOrderPosition</h3>
+<EditForm Model="@position" OnSubmit="@SubmitPosition">
+    <div>
+        Treść zamowienia:
+        <InputText @bind-Value="position.Position"/>
+    </div>
+    <div>
+        Dodatki:
+        <InputText @bind-Value="position.Additives" />
+    </div>
+    <div>
+        Koszt:
+        <InputNumber @bind-Value="position.Cost" />
+    </div>
+    <FluentButton Type="ButtonType.Submit">Dodaj Pozycję</FluentButton>
+</EditForm>
+@code {
+    [Parameter]
+    public int? orderId{ get; set; }
+    [Parameter]
+    public string userId{ get; set; }
+    public OrderPositionModel position = new OrderPositionModel();
+
+    private async Task SubmitPosition()
+    {
+        position.User = userId;
+        position.OrderId = orderId;
+        Console.WriteLine(orderId);
+        var httpClient = HttpClientFactory.CreateClient("FoodOrderApi");
+        var response = await httpClient.PostAsJsonAsync("api/OrderPosition", position);
+        //await LoadPositions(); 
+        if (response.IsSuccessStatusCode)
+        {
+            position = new OrderPositionModel();
+        }
+    }
+}

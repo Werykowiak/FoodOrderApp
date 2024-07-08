@@ -1,5 +1,5 @@
 ﻿@using FoodOrderApp.Models
-@using Microsoft.Graph.Models;
+@using Microsoft.Graph.Models
 @using Microsoft.Graph
 @page "/createOrder"
 @inject IHttpClientFactory HttpClientFactory
@@ -31,7 +31,7 @@
         <InputNumber @bind-Value="order.AccountNumber" />
     </div>
     <div>
-        <FluentButton Type="ButtonType.Submit">Save</FluentButton>
+        <FluentButton Type="ButtonType.Submit">Stwórz zamówienie</FluentButton>
     </div>
 </EditForm>
 

@@ -1,0 +1,41 @@
+﻿@using FoodOrderApp.Models
+@inject IHttpClientFactory HttpClientFactory
+
+@if(orderPositions == null)
+{
+    <p>Ładowanie</p>
+}else if(orderPositions.Count == 0)
+{
+    <p>Brak pozycji</p>
+}
+else
+{
+    @foreach (OrderPositionModel position in orderPositions)
+    {
+        <hr />
+        <p>Uzytkownik: @position.User</p>
+        <p>Tresc zamowienia: @position.Position</p>
+        if (position.Additives != null)
+        {
+            <p>Dodatki: @position.Additives</p>
+        }
+        <p>Koszt: @position.Cost</p>
+    }
+}
+
+@code {
+    [Parameter]
+    public int? orderId{ get; set; }
+    [Parameter]
+    public string? userId { get; set; }
+    private List<OrderPositionModel> orderPositions;
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadPositions();
+    }
+    private async Task LoadPositions()
+    {
+        var httpClient = HttpClientFactory.CreateClient("FoodOrderApi");
+        orderPositions = await httpClient.GetFromJsonAsync<List<OrderPositionModel>>($"api/OrderPosition/{orderId}");
+    }
+}

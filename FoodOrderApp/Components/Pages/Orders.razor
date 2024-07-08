@@ -1,0 +1,37 @@
+﻿@using FoodOrderApp.Models
+@inject IHttpClientFactory HttpClientFactory
+<h3>Zamowienia</h3>
+<button @onclick="LoadOrders">Odśwież</button>
+@if(orders == null)
+{
+    <p>Ładowanie</p>
+}else if(orders.Count == 0)
+{
+    <p>Brak zamówień</p>
+}
+else
+{
+    <FluentAccordion>
+    @foreach(OrderModel order in orders)
+    {
+        <FluentAccordionItem Heading="@order.Id.ToString()">
+            <OrderDetails Order="@order" userId="@userId" />
+        </FluentAccordionItem>
+    }
+    </FluentAccordion>
+}
+
+@code {
+    [Parameter]
+    public string? userId { get; set; }
+    private List<OrderModel> orders;
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadOrders();
+    }
+    private async Task LoadOrders()
+    {
+        var httpClient = HttpClientFactory.CreateClient("FoodOrderApi");
+        orders = await httpClient.GetFromJsonAsync<List<OrderModel>>("api/OrderModels");
+    }
+}

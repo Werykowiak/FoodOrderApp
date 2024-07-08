@@ -1,0 +1,39 @@
+﻿@using FoodOrderApp.Models
+<h3>OrderDetails</h3>
+@if (Order == null)
+{
+    <p>Ładowanie</p>
+}
+else
+{
+    <p>Zamawiający: @Order.Orderer</p>
+    <p>Restauracja: @Order.RestaurantName</p>
+    <p>Minimalna wartość zamówienia: @Order.MinCost</p>
+    <p>Opłata za dowóz: @Order.DeliveryFee</p>
+    if (Order.MinCostForFreeDelivery == null)
+    {
+        <p>Dostawa darmowa od: ----</p>
+    }
+    else
+    {
+        <p>Dostawa darmowa od: @Order.MinCostForFreeDelivery</p>
+    }
+    <p>Numer telefonu zamawiającego: @Order.PhoneNumber</p>
+
+    <FluentAccordion>
+        <FluentAccordionItem Heading="Dodawanie pozycji">
+            <CreateOrderPosition orderId="@Order.Id" userId="@userId" />
+        </FluentAccordionItem>
+        <FluentAccordionItem Heading="Pozycje">
+            <OrderPositions orderId="@Order.Id" userId="@userId" />
+        </FluentAccordionItem>
+    </FluentAccordion>
+
+    
+}
+@code {
+    [Parameter]
+    public OrderModel Order{ get; set; }
+    [Parameter]
+    public string? userId { get; set; }
+}
