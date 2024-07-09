@@ -9,25 +9,25 @@ else
     <p>Zamawiający: @Order.Orderer</p>
     <p>Restauracja: @Order.RestaurantName</p>
     <p>Minimalna wartość zamówienia: @Order.MinCost</p>
-    <p>Opłata za dowóz: @Order.DeliveryFee</p>
-    if (Order.MinCostForFreeDelivery == null)
+    if (Order.MinCost - Order.CurrentCost>0)
     {
-        <p>Dostawa darmowa od: ----</p>
+        <p>Aby można było zamówić brakuje: @(Order.MinCost - Order.CurrentCost)</p>
     }
-    else
+    if (Order.MinCostForFreeDelivery != null)
     {
-        <p>Dostawa darmowa od: @Order.MinCostForFreeDelivery</p>
+        if (Order.MinCostForFreeDelivery - Order.CurrentCost > 0)
+        {
+            <p>Opłata za dowóz: @Order.DeliveryFee</p>
+            <p>Do darmowej dostawy brakuje: @(Order.MinCostForFreeDelivery - Order.CurrentCost)</p>
+        }
+        else
+        {
+            <p>Dostawa jest darmowa</p>
+        }
     }
     <p>Numer telefonu zamawiającego: @Order.PhoneNumber</p>
 
-    <FluentAccordion>
-        <FluentAccordionItem Heading="Dodawanie pozycji">
-            <CreateOrderPosition orderId="@Order.Id" userId="@userId" />
-        </FluentAccordionItem>
-        <FluentAccordionItem Heading="Pozycje">
-            <OrderPositions orderId="@Order.Id" userId="@userId" />
-        </FluentAccordionItem>
-    </FluentAccordion>
+    <OrderPositions orderId="@Order.Id" userId="@userId" />
 
     
 }

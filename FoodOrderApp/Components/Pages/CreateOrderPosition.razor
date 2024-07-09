@@ -18,16 +18,16 @@
 </EditForm>
 @code {
     [Parameter]
-    public int? orderId{ get; set; }
+    public int orderId{ get; set; }
     [Parameter]
     public string userId{ get; set; }
     public OrderPositionModel position = new OrderPositionModel();
 
     private async Task SubmitPosition()
-    {
+    {        
         position.User = userId;
         position.OrderId = orderId;
-        Console.WriteLine(orderId);
+        //Console.WriteLine(orderId);
         var httpClient = HttpClientFactory.CreateClient("FoodOrderApi");
         var response = await httpClient.PostAsJsonAsync("api/OrderPosition", position);
         //await LoadPositions(); 

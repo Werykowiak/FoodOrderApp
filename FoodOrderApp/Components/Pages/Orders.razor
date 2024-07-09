@@ -1,7 +1,8 @@
 ﻿@using FoodOrderApp.Models
 @inject IHttpClientFactory HttpClientFactory
+@inject TeamsUserCredential teamsUserCredential
 <h3>Zamowienia</h3>
-<button @onclick="LoadOrders">Odśwież</button>
+<button @onclick="ReLoadOrders">Odśwież</button>
 @if(orders == null)
 {
     <p>Ładowanie</p>
@@ -15,7 +16,28 @@ else
     @foreach(OrderModel order in orders)
     {
         <FluentAccordionItem Heading="@order.Id.ToString()">
-            <OrderDetails Order="@order" userId="@userId" />
+            <p>Zamawiający: @order.Orderer</p>
+            <p>Restauracja: @order.RestaurantName</p>
+            <p>Minimalna wartość zamówienia: @order.MinCost</p>
+            <p>Aktualna wartość zamówienia: @order.CurrentCost</p>
+            @if (order.MinCost - order.CurrentCost > 0)
+            {
+                <p>Aby można było zamówić brakuje: @(order.MinCost - order.CurrentCost)</p>
+            }
+            @if (order.MinCostForFreeDelivery != null)
+            {
+                if (order.MinCostForFreeDelivery - order.CurrentCost > 0)
+                {
+                    <p>Opłata za dowóz: @order.DeliveryFee</p>
+                    <p>Do darmowej dostawy brakuje: @(order.MinCostForFreeDelivery - order.CurrentCost)</p>
+                }
+                else
+                {
+                    <p>Dostawa jest darmowa</p>     
+                }
+            }
+            <p>Numer telefonu zamawiającego: @order.PhoneNumber</p>
+            <OrderPositions orderId="@order.Id" userId="@userId" Parent="@this"/>
         </FluentAccordionItem>
     }
     </FluentAccordion>
@@ -28,10 +50,20 @@ else
     protected override async Task OnInitializedAsync()
     {
         await LoadOrders();
+
     }
     private async Task LoadOrders()
     {
         var httpClient = HttpClientFactory.CreateClient("FoodOrderApi");
         orders = await httpClient.GetFromJsonAsync<List<OrderModel>>("api/OrderModels");
+
+    }
+    public async Task ReLoadOrders()
+    {
+        await LoadOrders();
+    }
+    private async Task GetUser()
+    {
+        
     }
 }
