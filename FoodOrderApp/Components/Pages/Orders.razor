@@ -12,7 +12,7 @@
 }
 else
 {
-    <FluentAccordion>
+    <FluentAccordion >
     @foreach(OrderModel order in orders)
     {
         <FluentAccordionItem Heading="@order.Id.ToString()">
@@ -37,7 +37,19 @@ else
                 }
             }
             <p>Numer telefonu zamawiającego: @order.PhoneNumber</p>
-            <OrderPositions orderId="@order.Id" userId="@userId" Parent="@this"/>
+            @if (UserId == order.Orderer)
+            {
+                if (order.IsClosed)
+                {
+                    <FluentButton OnClick="@(e => OpenOrder(order))">Otwórz ponownie zamówienie</FluentButton>
+                }
+                else
+                {
+                    <FluentButton OnClick="@(e => CloseOrder(order))">Zamknij zamówienie</FluentButton>
+                }
+                
+            }
+            <OrderPositions OrderId="@order.Id" UserId="@UserId" IsClosed="@order.IsClosed" Parent="@this" OrdererId="@order.Orderer"/>
         </FluentAccordionItem>
     }
     </FluentAccordion>
@@ -45,25 +57,34 @@ else
 
 @code {
     [Parameter]
-    public string? userId { get; set; }
+    public string? UserId { get; set; }
     private List<OrderModel> orders;
     protected override async Task OnInitializedAsync()
     {
         await LoadOrders();
-
     }
     private async Task LoadOrders()
     {
         var httpClient = HttpClientFactory.CreateClient("FoodOrderApi");
         orders = await httpClient.GetFromJsonAsync<List<OrderModel>>("api/OrderModels");
-
     }
     public async Task ReLoadOrders()
     {
+        orders = new List<OrderModel>();
         await LoadOrders();
     }
-    private async Task GetUser()
+    private async Task GetUser(string userId)
     {
-        
+
+    }
+    private async Task CloseOrder(OrderModel order)
+    {
+        var httpClient = HttpClientFactory.CreateClient("FoodOrderApi");
+        var orders = await httpClient.PutAsJsonAsync($"api/OrderModels/{order.Id}/ChangeState/true",order);
+    }
+    private async Task OpenOrder(OrderModel order)
+    {
+        var httpClient = HttpClientFactory.CreateClient("FoodOrderApi");
+        var orders = await httpClient.PutAsJsonAsync($"api/OrderModels/{order.Id}/ChangeState/false", order);
     }
 }

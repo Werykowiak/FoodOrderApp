@@ -27,7 +27,7 @@ else
     }
     <p>Numer telefonu zamawiającego: @Order.PhoneNumber</p>
 
-    <OrderPositions orderId="@Order.Id" userId="@userId" />
+    <OrderPositions OrderId="@Order.Id" UserId="@UserId" />
 
     
 }
@@ -35,5 +35,5 @@ else
     [Parameter]
     public OrderModel Order{ get; set; }
     [Parameter]
-    public string? userId { get; set; }
+    public string? UserId { get; set; }
 }

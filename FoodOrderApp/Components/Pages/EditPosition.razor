@@ -1,0 +1,26 @@
+﻿@using FoodOrderApp.Models
+@inject IHttpClientFactory HttpClientFactory
+<EditForm Model="@Model" OnSubmit="@AddComment" >
+    <FluentTextArea @bind-Value="Model.comment" />
+    <FluentButton Type="ButtonType.Submit">Dodaj komentarz</FluentButton>
+</EditForm>
+
+@code {
+    [Parameter]
+    public int PositionId { get; set; }
+    private Comment? Model = new Comment();
+    private async Task AddComment()
+    {
+        var httpClient = HttpClientFactory.CreateClient("FoodOrderApi");
+        var position = await httpClient.GetFromJsonAsync<OrderPositionModel>($"api/OrderPosition/{PositionId}/GetById");
+        position.Comment = Model.comment;
+
+        var response = await httpClient.PutAsJsonAsync($"api/OrderPosition/{position.Id}", position);
+        Model = new Comment();
+    }
+
+    public class Comment
+    {
+        public string comment;
+    }
+}

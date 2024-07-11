@@ -1,24 +1,29 @@
 ﻿@using FoodOrderApp.Models
+@inject TeamsUserCredential teamsUserCredential
 @inject IHttpClientFactory HttpClientFactory
 
+
 <FluentAccordion>
-    <FluentAccordionItem Heading="Dodawanie pozycji">
-        <EditForm Model="@position" OnSubmit="@SubmitPosition">
-            <div>
-                Treść zamowienia:
-                <InputText @bind-Value="position.Position" />
-            </div>
-            <div>
-                Dodatki:
-                <InputText @bind-Value="position.Additives" />
-            </div>
-            <div>
-                Koszt:
-                <InputNumber @bind-Value="position.Cost" />
-            </div>
-            <FluentButton Type="ButtonType.Submit">Dodaj Pozycję</FluentButton>
-        </EditForm>
-    </FluentAccordionItem>
+    @if (!IsClosed)
+    {
+        <FluentAccordionItem Heading="Dodawanie pozycji">
+            <EditForm Model="@position" OnSubmit="@SubmitPosition">
+                <div>
+                    Treść zamowienia:
+                    <InputText @bind-Value="position.Position" />
+                </div>
+                <div>
+                    Dodatki:
+                    <InputText @bind-Value="position.Additives" />
+                </div>
+                <div>
+                    Koszt:
+                    <InputNumber @bind-Value="position.Cost" />
+                </div>
+                <FluentButton Type="ButtonType.Submit">Dodaj Pozycję</FluentButton>
+            </EditForm>
+        </FluentAccordionItem>
+    } 
     <FluentAccordionItem Heading="Pozycje" @onclick="LoadPositions">
         @if (orderPositions == null)
         {
@@ -33,17 +38,33 @@
             @foreach (OrderPositionModel position in orderPositions)
             {
                 <hr />
-                <p>Uzytkownik: @position.User</p>
+                <p>Uzytkownik: @position.UserId</p>
                 <p>Tresc zamowienia: @position.Position</p>
                 if (position.Additives != null)
                 {
                     <p>Dodatki: @position.Additives</p>
                 }
                 <p>Koszt: @position.Cost</p>
-                if (userId == position.User)
+                if (UserId == position.UserId && !IsClosed)
                 {
                     <button @onclick="@(e => DeletePosition((int)position.Id))">Usuń</button>
-                }    
+                }
+                if (UserId == OrdererId)
+                {
+                    <EditPosition PositionId="(int)position.Id" />
+                }
+                @if (UserId == position.UserId)
+                {
+                    if (position.IsPaid)
+                    {
+                        <FluentButton OnClick="@(e => SetAsUnpaid(position))">Oznacz jako nie zapłacone</FluentButton>
+                    }
+                    else
+                    {
+                        <FluentButton OnClick="@(e => SetAsPaid(position))">Oznacz jako zapłacone</FluentButton>
+                    }
+
+                }
             }
         }
     </FluentAccordionItem>
@@ -53,26 +74,43 @@
 
 @code {
     [Parameter]
-    public int? orderId{ get; set; }
+    public int? OrderId{ get; set; }
     [Parameter]
-    public string? userId { get; set; }
+    public string? UserId { get; set; }
     [Parameter]
     public Orders Parent { get; set; }
-
+    [Parameter]
+    public bool IsClosed{ get; set; }
+    [Parameter]
+    public string? OrdererId { get; set; }
+    public string? Comment;
     private List<OrderPositionModel> orderPositions;
     public OrderPositionModel position = new OrderPositionModel();
 
     private async Task LoadPositions()
     {
-        await Parent.ReLoadOrders();
-        var httpClient = HttpClientFactory.CreateClient("FoodOrderApi");
-        orderPositions = await httpClient.GetFromJsonAsync<List<OrderPositionModel>>($"api/OrderPosition/{orderId}");
+        //await Parent.ReLoadOrders();
+        if (OrdererId == UserId)
+            await LoadAllPositions();
+        else
+            await LoadUserPositions();
     }
-
+    private async Task LoadAllPositions()
+    {
+        //await Parent.ReLoadOrders();
+        var httpClient = HttpClientFactory.CreateClient("FoodOrderApi");
+        orderPositions = await httpClient.GetFromJsonAsync<List<OrderPositionModel>>($"api/OrderPosition/{OrderId}");
+    }
+    private async Task LoadUserPositions()
+    {
+        //await Parent.ReLoadOrders();
+        var httpClient = HttpClientFactory.CreateClient("FoodOrderApi");
+        orderPositions = await httpClient.GetFromJsonAsync<List<OrderPositionModel>>($"api/OrderPosition/{OrderId}/GetUserPositionsForOrder/{UserId}");
+    }
     private async Task SubmitPosition()
     {
-        position.User = userId;
-        position.OrderId = (int)orderId;
+        position.UserId = UserId;
+        position.OrderId = (int)OrderId;
         //Console.WriteLine(orderId);
         var httpClient = HttpClientFactory.CreateClient("FoodOrderApi");
         var response = await httpClient.PostAsJsonAsync("api/OrderPosition", position);
@@ -87,6 +125,28 @@
     {
         var httpClient = HttpClientFactory.CreateClient("FoodOrderApi");
         var respone = await httpClient.DeleteAsync($"api/OrderPosition/{positionId}");
+        await LoadPositions();
+    }
+    private async Task AddComment(int positionId, OrderPositionModel position)
+    {
+        position.Comment = Comment;
+        var httpClient = HttpClientFactory.CreateClient("FoodOrderApi");
+        var response = await httpClient.PutAsJsonAsync($"api/OrderPosition", position);
+        await LoadPositions();
+    }
+    private async Task GetUserInfo(string userId)
+    {
+        //var user = await teamsUserCredential.
+    }
+    private async Task SetAsPaid(OrderPositionModel position)
+    {
+        var httpClient = HttpClientFactory.CreateClient("FoodOrderApi");
+        var response = await httpClient.PutAsJsonAsync($"api/OrderPosition/{position.Id}/SetIsPaid/true", position);
+    }
+    private async Task SetAsUnpaid(OrderPositionModel position)
+    {
+        var httpClient = HttpClientFactory.CreateClient("FoodOrderApi");
+        var response = await httpClient.PutAsJsonAsync($"api/OrderPosition/{position.Id}/SetIsPaid/false", position);
         await LoadPositions();
     }
 }
