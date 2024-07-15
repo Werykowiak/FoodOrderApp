@@ -1,8 +1,12 @@
 ﻿@using FoodOrderApp.Models
+@using Microsoft.AspNetCore.Components.WebAssembly.Authentication
 @using Microsoft.Graph.Models
 @using Microsoft.Graph
+
 @page "/createOrder"
 @inject IHttpClientFactory HttpClientFactory
+
+
 <h3>Order</h3>
 
 <EditForm Model="@order" OnSubmit="@SubmitOrder">
@@ -38,11 +42,18 @@
 @code {
     [Parameter]
     public string UserId { get; set; }
+    private User user;
     public OrderModel order = new OrderModel();
     public string message;
 
+    protected override async Task OnInitializedAsync()
+    {
+        //user = await GraphClient.Me.GetAsync();
+
+    }
     private async Task SubmitOrder()
     {
+        //order.Orderer = user.Id;
         order.Orderer = UserId;
         var httpClient = HttpClientFactory.CreateClient("FoodOrderApi");
         var response = await httpClient.PostAsJsonAsync("api/OrderModels", order);

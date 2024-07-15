@@ -45,15 +45,19 @@
                     <p>Dodatki: @position.Additives</p>
                 }
                 <p>Koszt: @position.Cost</p>
+                if(UserId == position.UserId && position.Comment != null)
+                {
+                    <p>Komentarz: @position.Comment</p>
+                }
                 if (UserId == position.UserId && !IsClosed)
                 {
                     <button @onclick="@(e => DeletePosition((int)position.Id))">Usuń</button>
                 }
-                if (UserId == OrdererId)
+                if (UserId == OrdererId && position.Comment == null)
                 {
                     <EditPosition PositionId="(int)position.Id" />
                 }
-                @if (UserId == position.UserId)
+                @if (UserId == OrdererId)
                 {
                     if (position.IsPaid)
                     {
