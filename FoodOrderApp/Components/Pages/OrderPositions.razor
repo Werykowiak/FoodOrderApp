@@ -67,7 +67,6 @@
                     {
                         <FluentButton OnClick="@(e => SetAsPaid(position))">Oznacz jako zapłacone</FluentButton>
                     }
-
                 }
             }
         }
@@ -138,10 +137,10 @@
         var response = await httpClient.PutAsJsonAsync($"api/OrderPosition", position);
         await LoadPositions();
     }
-    private async Task GetUserInfo(string userId)
+    /*private async Task GetUserInfo(string userId)
     {
         //var user = await teamsUserCredential.
-    }
+    }*/
     private async Task SetAsPaid(OrderPositionModel position)
     {
         var httpClient = HttpClientFactory.CreateClient("FoodOrderApi");

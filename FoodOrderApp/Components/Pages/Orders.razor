@@ -22,7 +22,7 @@ else
             <p>Aktualna wartość zamówienia: @order.CurrentCost</p>
             @if (order.MinCost - order.CurrentCost > 0)
             {
-                <p>Aby można było zamówić brakuje: @(order.MinCost - order.CurrentCost)</p>
+                <p>Aby można było zamówić brakuje: @(Math.Round((decimal)(order.MinCost - order.CurrentCost),2))</p>
             }
             @if (order.MinCostForFreeDelivery != null)
             {
@@ -47,7 +47,6 @@ else
                 {
                     <FluentButton OnClick="@(e => CloseOrder(order))">Zamknij zamówienie</FluentButton>
                 }
-                
             }
             <p>Masz do zapłaty: @Cost</p>
             <OrderPositions OrderId="@order.Id" UserId="@UserId" IsClosed="@order.IsClosed" Parent="@this" OrdererId="@order.Orderer"/>
@@ -93,6 +92,6 @@ else
     {
         var httpClient = HttpClientFactory.CreateClient("FoodOrderApi");
         var ordersCost = await httpClient.GetFromJsonAsync<double>($"api/OrderModels/{orderId}/GetUserCostForOrder/{UserId}");
-        Cost = ordersCost;
+        Cost = Math.Round(ordersCost,2);
     }
 }

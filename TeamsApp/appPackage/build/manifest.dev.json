@@ -1,0 +1,60 @@
+{
+    "$schema": "https://developer.microsoft.com/en-us/json-schemas/teams/v1.16/MicrosoftTeams.schema.json",
+    "manifestVersion": "1.16",
+    "version": "1.0.0",
+    "id": "9dc0953c-8461-41fc-9ef7-7801e20a41e4",
+    "packageName": "com.microsoft.teams.extension",
+    "developer": {
+        "name": "Teams App, Inc.",
+        "websiteUrl": "https://www.example.com",
+        "privacyUrl": "https://www.example.com/privacy",
+        "termsOfUseUrl": "https://www.example.com/termsofuse"
+    },
+    "icons": {
+        "color": "color.png",
+        "outline": "outline.png"
+    },
+    "name": {
+        "short": "FoodOrderAppdev",
+        "full": "Full name for FoodOrderApp"
+    },
+    "description": {
+        "short": "Short description of FoodOrderApp",
+        "full": "Full description of FoodOrderApp"
+    },
+    "accentColor": "#FFFFFF",
+    "bots": [],
+    "composeExtensions": [],
+    "configurableTabs": [
+        {
+            "configurationUrl": "https://ssotab25bcb0.azurewebsites.net/config",
+            "canUpdateConfiguration": true,
+            "scopes": [
+                "team",
+                "groupchat"
+            ]
+        }
+    ],
+    "staticTabs": [
+        {
+            "entityId": "index",
+            "name": "Personal Tab",
+            "contentUrl": "https://ssotab25bcb0.azurewebsites.net/tab",
+            "websiteUrl": "https://ssotab25bcb0.azurewebsites.net/tab",
+            "scopes": [
+                "personal"
+            ]
+        }
+    ],
+    "permissions": [
+        "identity",
+        "messageTeamMembers"
+    ],
+    "validDomains": [
+        "ssotab25bcb0.azurewebsites.net"
+    ],
+    "webApplicationInfo": {
+        "id": "24f94017-f9de-431a-b1ba-08ef364a1a6d",
+        "resource": "api://ssotab25bcb0.azurewebsites.net/24f94017-f9de-431a-b1ba-08ef364a1a6d"
+    }
+}

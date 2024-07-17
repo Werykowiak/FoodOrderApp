@@ -24,15 +24,11 @@ builder.Services.AddHttpClient("FoodOrderApi", client =>
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddAntiforgery(o => o.SuppressXFrameOptionsHeader = true);
 
-/*builder.Services.AddScoped<GraphServiceClient>(sp =>
-{
-    var tokenAcquisition = sp.GetRequiredService<ITokenAcquisition>();
-    return new GraphServiceClient(new DelegateAuthenticationProvider(async (requestMessage) =>
-    {
-        var token = await tokenAcquisition.GetAccessTokenForUserAsync(new[] { "User.Read" });
-        requestMessage.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
-    }));
-});*/
+/*var baseUrl = builder.Configuration.GetSection("MicrosoftGraph")["BaseUrl"];
+var scopes = builder.Configuration.GetSection("MicrosoftGraph:Scopes")
+    .Get<List<string>>();
+
+builder.Services.AddGraphClient(baseUrl, scopes);*/
 
 var app = builder.Build();
 

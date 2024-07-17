@@ -10,29 +10,37 @@
 <h3>Order</h3>
 
 <EditForm Model="@order" OnSubmit="@SubmitOrder">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
     <div>
         Nazwa Restauracji:
         <InputText @bind-Value="order.RestaurantName" />
+        <ValidationMessage For="() => order.RestaurantName" />
     </div>
     <div>
         Minimalna wartość zamówienia:
         <InputNumber @bind-Value="order.MinCost" />
+        <ValidationMessage For="() => order.MinCost" />
     </div>
     <div>
         Koszt dostawy:
         <InputNumber @bind-Value="order.DeliveryFee" />
+        <ValidationMessage For="() => order.DeliveryFee" />
     </div>
     <div>
         Darmowy dowóz od:
         <InputNumber @bind-Value="order.MinCostForFreeDelivery" />
+        <ValidationMessage For="() => order.MinCostForFreeDelivery" />
     </div>
     <div>
         Numer telefonu:
-        <InputNumber @bind-Value="order.PhoneNumber" />
+        <InputText @bind-Value="order.PhoneNumber" />
+        <ValidationMessage For="() => order.PhoneNumber" />
     </div>
     <div>
         Numer konta bankowego:
-        <InputNumber @bind-Value="order.AccountNumber" />
+        <InputText @bind-Value="order.AccountNumber" />
+        <ValidationMessage For="() => order.AccountNumber" />
     </div>
     <div>
         <FluentButton Type="ButtonType.Submit">Stwórz zamówienie</FluentButton>
@@ -42,14 +50,12 @@
 @code {
     [Parameter]
     public string UserId { get; set; }
-    private User user;
+    private Microsoft.Graph.Models.User? user;
     public OrderModel order = new OrderModel();
-    public string message;
 
     protected override async Task OnInitializedAsync()
     {
-        //user = await GraphClient.Me.GetAsync();
-
+        //user = await Client.Me.GetAsync();
     }
     private async Task SubmitOrder()
     {
@@ -61,12 +67,8 @@
 
         if (response.IsSuccessStatusCode)
         {
-            message = "Item added successfully!";
             order = new OrderModel();
         }
-        else
-        {
-            message = "Error adding item.";
-        }
     }
+    
 }
