@@ -29,5 +29,21 @@ namespace FoodOrderApp.Models
         [Required(ErrorMessage = "Numer konta jest wymagany!")]
         public string? AccountNumber { get; set; }
         public bool IsClosed { get; set; }
+
+        public OrderModel() { }
+        public OrderModel(OrderModel order) 
+        {
+            this.Id = order.Id;
+            this.Orderer = order.Orderer;
+            this.RestaurantName = order.RestaurantName;
+            this.MinCost = order.MinCost;
+            this.CurrentCost = order.CurrentCost;
+            this.MinCostForFreeDelivery = order.MinCostForFreeDelivery;
+            this.DeliveryFee = order.DeliveryFee;
+            this.PhoneNumber = order.PhoneNumber;
+            this.AccountNumber = order.AccountNumber;
+            this.IsClosed = order.IsClosed;
+        }
     }
+    
 }

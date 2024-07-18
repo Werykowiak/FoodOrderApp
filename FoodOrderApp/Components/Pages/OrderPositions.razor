@@ -1,13 +1,15 @@
 ﻿@using FoodOrderApp.Models
 @inject TeamsUserCredential teamsUserCredential
 @inject IHttpClientFactory HttpClientFactory
-
-
+@inject IDialogService DialogService
 <FluentAccordion>
     @if (!IsClosed)
     {
         <FluentAccordionItem Heading="Dodawanie pozycji">
+            
             <EditForm Model="@position" OnSubmit="@SubmitPosition">
+                <DataAnnotationsValidator />
+                <ValidationSummary />
                 <div>
                     Treść zamowienia:
                     <InputText @bind-Value="position.Position" />
@@ -38,6 +40,11 @@
             @foreach (OrderPositionModel position in orderPositions)
             {
                 <hr />
+                if(UserId == position.UserId)
+                {
+                    <FluentButton Appearance="Appearance.Accent" OnClick="@(e=>EditAsync(position))">Edit</FluentButton>
+                }
+                
                 <p>Uzytkownik: @position.UserId</p>
                 <p>Tresc zamowienia: @position.Position</p>
                 if (position.Additives != null)
@@ -55,7 +62,7 @@
                 }
                 if (UserId == OrdererId && position.Comment == null)
                 {
-                    <EditPosition PositionId="(int)position.Id" />
+                    <AddComment PositionId="(int)position.Id" />
                 }
                 @if (UserId == OrdererId)
                 {
@@ -92,7 +99,7 @@
 
     private async Task LoadPositions()
     {
-        //await Parent.ReLoadOrders();
+        
         if (OrdererId == UserId)
             await LoadAllPositions();
         else
@@ -122,6 +129,7 @@
         {
             position = new OrderPositionModel();
         }
+        
         await LoadPositions();
     }
     private async Task DeletePosition(int positionId)
@@ -138,7 +146,7 @@
         await LoadPositions();
     }
     /*private async Task GetUserInfo(string userId)
-    {
+        {
         //var user = await teamsUserCredential.
     }*/
     private async Task SetAsPaid(OrderPositionModel position)
@@ -150,6 +158,35 @@
     {
         var httpClient = HttpClientFactory.CreateClient("FoodOrderApi");
         var response = await httpClient.PutAsJsonAsync($"api/OrderPosition/{position.Id}/SetIsPaid/false", position);
+        await LoadPositions();
+    }
+    private async Task EditAsync(OrderPositionModel position)
+    {
+
+        var data = new OrderPositionModel(position);
+
+        var dialog = await DialogService.ShowDialogAsync<EditPosition>(data, new DialogParameters()
+            {
+                Height = "400px",
+                //Title = $"Edycja pozycji",
+                PreventDismissOnOverlayClick = false,
+                PreventScroll = true,
+            });
+
+        var result = await dialog.Result;
+        if (!result.Cancelled && result.Data != null)
+        {
+            var comment = position.Comment;
+            position = (OrderPositionModel)result.Data;
+            position.Comment = comment;
+            await UpdatePosition(position);
+        }
+
+    }
+    private async Task UpdatePosition(OrderPositionModel position)
+    {
+        var httpClient = HttpClientFactory.CreateClient("FoodOrderApi");
+        var response = await httpClient.PutAsJsonAsync($"api/OrderPosition/{position.Id}", position);
         await LoadPositions();
     }
 }

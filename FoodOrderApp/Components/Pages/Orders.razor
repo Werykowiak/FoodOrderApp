@@ -1,6 +1,7 @@
 ﻿@using FoodOrderApp.Models
 @inject IHttpClientFactory HttpClientFactory
 @inject TeamsUserCredential teamsUserCredential
+@inject IDialogService DialogService
 <h3>Zamowienia</h3>
 <button @onclick="ReLoadOrders">Odśwież</button>
 @if(orders == null)
@@ -16,6 +17,10 @@ else
     @foreach(OrderModel order in orders)
     {
         <FluentAccordionItem Heading="@order.Id.ToString()" @onclick="async () => await GetCost((int)order.Id)">
+            @if(UserId == order.Orderer)
+            {
+                <FluentButton Appearance="Appearance.Accent" OnClick="@(e=>EditAsync(order))">Edit</FluentButton>
+            }
             <p>Zamawiający: @order.Orderer</p>
             <p>Restauracja: @order.RestaurantName</p>
             <p>Minimalna wartość zamówienia: @order.MinCost</p>
@@ -23,6 +28,10 @@ else
             @if (order.MinCost - order.CurrentCost > 0)
             {
                 <p>Aby można było zamówić brakuje: @(Math.Round((decimal)(order.MinCost - order.CurrentCost),2))</p>
+            }
+            else
+            {
+                <p>Masz do zapłaty: @Cost</p>
             }
             @if (order.MinCostForFreeDelivery != null)
             {
@@ -48,7 +57,7 @@ else
                     <FluentButton OnClick="@(e => CloseOrder(order))">Zamknij zamówienie</FluentButton>
                 }
             }
-            <p>Masz do zapłaty: @Cost</p>
+            
             <OrderPositions OrderId="@order.Id" UserId="@UserId" IsClosed="@order.IsClosed" Parent="@this" OrdererId="@order.Orderer"/>
         </FluentAccordionItem>
     }
@@ -56,7 +65,7 @@ else
 }
 
 @code {
-    [Parameter]
+    [CascadingParameter]
     public string? UserId { get; set; }
     private List<OrderModel> orders;
     private double Cost { get; set; }
@@ -93,5 +102,29 @@ else
         var httpClient = HttpClientFactory.CreateClient("FoodOrderApi");
         var ordersCost = await httpClient.GetFromJsonAsync<double>($"api/OrderModels/{orderId}/GetUserCostForOrder/{UserId}");
         Cost = Math.Round(ordersCost,2);
+    }
+    private async Task EditAsync(OrderModel order)
+    {
+
+        var data = new OrderModel(order);
+
+        var dialog = await DialogService.ShowDialogAsync<EditOrder>(data, new DialogParameters()
+            {
+                Height = "400px",
+                //Title = $"Edycja pozycji",
+                PreventDismissOnOverlayClick = false,
+                PreventScroll = true,
+            });
+        var result = await dialog.Result;
+        if (!result.Cancelled && result.Data != null)
+        {
+            order = (OrderModel)result.Data;
+            await UpdateOrder(order);
+        }
+    }
+    private async Task UpdateOrder(OrderModel order)
+    {
+        var httpclient = HttpClientFactory.CreateClient("FoodOrderApi");
+        var result = await httpclient.PutAsJsonAsync($"api/OrderModels/{order.Id}",order);
     }
 }

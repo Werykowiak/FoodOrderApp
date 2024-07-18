@@ -1,6 +1,6 @@
 ﻿@using FoodOrderApp.Models
-@implements IDialogContentComponent<OrderPositionModel>
-@page "/editpositionmodal"
+@implements IDialogContentComponent<OrderModel>
+
 <FluentDialogHeader ShowDismiss="true">
     <FluentStack VerticalAlignment="VerticalAlignment.Center">
         <FluentLabel Typo="Typography.PaneHeader">
@@ -13,16 +13,34 @@
         <DataAnnotationsValidator />
         <ValidationSummary />
         <div>
-            Treść zamowienia:
-            <InputText @bind-Value="Content.Position" />
+            Nazwa Restauracji:
+            <InputText @bind-Value="Content.RestaurantName" />
+            <ValidationMessage For="() => Content.RestaurantName" />
         </div>
         <div>
-            Dodatki:
-            <InputText @bind-Value="Content.Additives" />
+            Minimalna wartość zamówienia:
+            <InputNumber @bind-Value="Content.MinCost" />
+            <ValidationMessage For="() => Content.MinCost" />
         </div>
         <div>
-            Koszt:
-            <InputNumber @bind-Value="Content.Cost" />
+            Koszt dostawy:
+            <InputNumber @bind-Value="Content.DeliveryFee" />
+            <ValidationMessage For="() => Content.DeliveryFee" />
+        </div>
+        <div>
+            Darmowy dowóz od:
+            <InputNumber @bind-Value="Content.MinCostForFreeDelivery" />
+            <ValidationMessage For="() => Content.MinCostForFreeDelivery" />
+        </div>
+        <div>
+            Numer telefonu:
+            <InputText @bind-Value="Content.PhoneNumber" />
+            <ValidationMessage For="() => Content.PhoneNumber" />
+        </div>
+        <div>
+            Numer konta bankowego:
+            <InputText @bind-Value="Content.AccountNumber" />
+            <ValidationMessage For="() => Content.AccountNumber" />
         </div>
     </EditForm>
 </FluentDialogBody>
@@ -38,9 +56,10 @@
         Cancel
     </FluentButton>
 </FluentDialogFooter>
+
 @code {
     [Parameter]
-    public OrderPositionModel Content { get; set; }
+    public OrderModel Content { get; set; }
     private EditContext _editContext = default!;
 
     [CascadingParameter]

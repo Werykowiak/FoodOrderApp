@@ -17,5 +17,18 @@ namespace FoodOrderApp.Models
         public double? Cost { get; set; }
         public int OrderId { get; set; }
         public bool IsPaid { get; set; }
+
+        public OrderPositionModel() { }
+        public OrderPositionModel(OrderPositionModel source)
+        {
+            Id = source.Id;
+            UserId = source.UserId;
+            Position = source.Position;
+            Comment = source.Comment;
+            Additives = source.Additives;
+            Cost = source.Cost;
+            OrderId = source.OrderId;
+            IsPaid = source.IsPaid;
+        }
     }
 }
