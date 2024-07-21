@@ -1,4 +1,7 @@
 ﻿@using FoodOrderApp.Models
+@using System.Net
+@using System.Text.Json
+
 @inject TeamsUserCredential teamsUserCredential
 @inject IHttpClientFactory HttpClientFactory
 @inject IDialogService DialogService
@@ -109,13 +112,33 @@
     {
         //await Parent.ReLoadOrders();
         var httpClient = HttpClientFactory.CreateClient("FoodOrderApi");
-        orderPositions = await httpClient.GetFromJsonAsync<List<OrderPositionModel>>($"api/OrderPosition/{OrderId}");
+        var response = await httpClient.GetAsync($"api/OrderPosition/{OrderId}");
+        if (response.StatusCode == HttpStatusCode.NoContent)
+        {
+            orderPositions = new List<OrderPositionModel>();
+            return;
+        }
+        response.EnsureSuccessStatusCode();
+
+        var jsonResponse = await response.Content.ReadAsStringAsync();
+
+        orderPositions = JsonSerializer.Deserialize<List<OrderPositionModel>>(jsonResponse);
     }
     private async Task LoadUserPositions()
     {
         //await Parent.ReLoadOrders();
         var httpClient = HttpClientFactory.CreateClient("FoodOrderApi");
-        orderPositions = await httpClient.GetFromJsonAsync<List<OrderPositionModel>>($"api/OrderPosition/{OrderId}/GetUserPositionsForOrder/{UserId}");
+        var response = await httpClient.GetAsync($"api/OrderPosition/{OrderId}/GetUserPositionsForOrder/{UserId}");
+        if (response.StatusCode == HttpStatusCode.NoContent)
+        {
+            orderPositions = new List<OrderPositionModel>();
+            return;
+        }
+        response.EnsureSuccessStatusCode();
+
+        var jsonResponse = await response.Content.ReadAsStringAsync();
+
+        orderPositions = JsonSerializer.Deserialize<List<OrderPositionModel>>(jsonResponse);
     }
     private async Task SubmitPosition()
     {
