@@ -1,6 +1,8 @@
 ﻿@using FoodOrderApp.Models
 @using System.Net
-@using System.Text.Json
+@using Newtonsoft.Json
+
+
 
 @inject TeamsUserCredential teamsUserCredential
 @inject IHttpClientFactory HttpClientFactory
@@ -9,7 +11,6 @@
     @if (!IsClosed)
     {
         <FluentAccordionItem Heading="Dodawanie pozycji">
-            
             <EditForm Model="@position" OnSubmit="@SubmitPosition">
                 <DataAnnotationsValidator />
                 <ValidationSummary />
@@ -29,7 +30,7 @@
             </EditForm>
         </FluentAccordionItem>
     } 
-    <FluentAccordionItem Heading="Pozycje" @onclick="LoadPositions">
+    <FluentAccordionItem Heading="Pozycje">
         @if (orderPositions == null)
         {
             <p>Ładowanie</p>
@@ -47,7 +48,6 @@
                 {
                     <FluentButton Appearance="Appearance.Accent" OnClick="@(e=>EditAsync(position))">Edit</FluentButton>
                 }
-                
                 <p>Uzytkownik: @position.UserId</p>
                 <p>Tresc zamowienia: @position.Position</p>
                 if (position.Additives != null)
@@ -65,7 +65,7 @@
                 }
                 if (UserId == OrdererId && position.Comment == null)
                 {
-                    <AddComment PositionId="(int)position.Id" />
+                   <AddComment PositionId="(int)position.Id" />
                 }
                 @if (UserId == OrdererId)
                 {
@@ -91,18 +91,22 @@
     [Parameter]
     public string? UserId { get; set; }
     [Parameter]
-    public Orders Parent { get; set; }
-    [Parameter]
     public bool IsClosed{ get; set; }
     [Parameter]
     public string? OrdererId { get; set; }
+    [Parameter]
+    public OrderDetails Parent { get; set; }
     public string? Comment;
     private List<OrderPositionModel> orderPositions;
     public OrderPositionModel position = new OrderPositionModel();
 
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadPositions();
+    }
     private async Task LoadPositions()
     {
-        
+        await Parent.ReLoadOrder();
         if (OrdererId == UserId)
             await LoadAllPositions();
         else
@@ -110,8 +114,8 @@
     }
     private async Task LoadAllPositions()
     {
-        //await Parent.ReLoadOrders();
         var httpClient = HttpClientFactory.CreateClient("FoodOrderApi");
+        //orderPositions = await httpClient.GetFromJsonAsync<List<OrderPositionModel>>($"api/OrderPosition/{OrderId}");
         var response = await httpClient.GetAsync($"api/OrderPosition/{OrderId}");
         if (response.StatusCode == HttpStatusCode.NoContent)
         {
@@ -121,8 +125,8 @@
         response.EnsureSuccessStatusCode();
 
         var jsonResponse = await response.Content.ReadAsStringAsync();
-
-        orderPositions = JsonSerializer.Deserialize<List<OrderPositionModel>>(jsonResponse);
+        
+        orderPositions = JsonConvert.DeserializeObject<List<OrderPositionModel>>(jsonResponse);
     }
     private async Task LoadUserPositions()
     {
@@ -138,7 +142,7 @@
 
         var jsonResponse = await response.Content.ReadAsStringAsync();
 
-        orderPositions = JsonSerializer.Deserialize<List<OrderPositionModel>>(jsonResponse);
+        orderPositions = JsonConvert.DeserializeObject<List<OrderPositionModel>>(jsonResponse);
     }
     private async Task SubmitPosition()
     {
@@ -176,6 +180,7 @@
     {
         var httpClient = HttpClientFactory.CreateClient("FoodOrderApi");
         var response = await httpClient.PutAsJsonAsync($"api/OrderPosition/{position.Id}/SetIsPaid/true", position);
+        await LoadPositions();
     }
     private async Task SetAsUnpaid(OrderPositionModel position)
     {

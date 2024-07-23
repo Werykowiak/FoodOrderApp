@@ -21,6 +21,7 @@ builder.Services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)
 
 var config = builder.Configuration.Get<ConfigOptions>();
 builder.Services.AddTeamsFx(config.TeamsFx.Authentication);
+
 builder.Services.AddScoped<MicrosoftTeams>();
 builder.Services.AddScoped<DialogService>();
 builder.Services.AddFluentUIComponents();
