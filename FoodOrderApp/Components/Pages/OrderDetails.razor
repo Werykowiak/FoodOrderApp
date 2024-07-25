@@ -38,6 +38,7 @@ else
         }
     }
     <p>Numer telefonu zamawiającego: @Order.PhoneNumber</p>
+    <p>Numer konta do zapłaty: @Order.AccountNumber</p>
     @if (UserId == Order.Orderer)
     {
         if (Order.IsClosed)
@@ -62,7 +63,6 @@ else
     public int OrderId { get; set; }
     public OrderModel Order { get; set; }
     private double Cost { get; set; }
-
     protected override async Task OnInitializedAsync()
     {
         await LoadOrder();

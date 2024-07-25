@@ -15,52 +15,10 @@ else if (ordersId.Count == 0)
 else
 {
     <FluentAccordion >
-        @foreach (int orderId in ordersId)
+    @foreach (int orderId in ordersId)
     {
-            <FluentAccordionItem Heading="@orderId.ToString()">
-            <OrderDetails OrderId="@orderId" UserId="@UserId" />
-            @* @if(UserId == order.Orderer)
-            {
-                <FluentButton Appearance="Appearance.Accent" OnClick="@(e=>EditAsync(order))">Edit</FluentButton>
-            }
-            <p>Zamawiający: @order.Orderer</p>
-            <p>Restauracja: @order.RestaurantName</p>
-            <p>Minimalna wartość zamówienia: @order.MinCost</p>
-            <p>Aktualna wartość zamówienia: @order.CurrentCost</p>
-            @if (order.MinCost - order.CurrentCost > 0)
-            {
-                <p>Aby można było zamówić brakuje: @(Math.Round((decimal)(order.MinCost - order.CurrentCost),2))</p>
-            }
-            else
-            {
-                <p>Masz do zapłaty: @Cost</p>
-            }
-            @if (order.MinCostForFreeDelivery != null)
-            {
-                if (order.MinCostForFreeDelivery - order.CurrentCost > 0)
-                {
-                    <p>Opłata za dowóz: @order.DeliveryFee</p>
-                    <p>Do darmowej dostawy brakuje: @(order.MinCostForFreeDelivery - order.CurrentCost)</p>
-                }
-                else
-                {
-                    <p>Dostawa jest darmowa</p>     
-                }
-            }
-            <p>Numer telefonu zamawiającego: @order.PhoneNumber</p>
-            @if (UserId == order.Orderer)
-            {
-                if (order.IsClosed)
-                {
-                    <FluentButton OnClick="@(e => OpenOrder(order))">Otwórz ponownie zamówienie</FluentButton>
-                }
-                else
-                {
-                    <FluentButton OnClick="@(e => CloseOrder(order))">Zamknij zamówienie</FluentButton>
-                }
-            }
-            
-            <OrderPositions OrderId="@order.Id" UserId="@UserId" IsClosed="@order.IsClosed" OrdererId="@order.Orderer"/> *@
+        <FluentAccordionItem Heading="@orderId.ToString()">
+        <OrderDetails OrderId="@orderId" UserId="@UserId" />
         </FluentAccordionItem>
     }
     </FluentAccordion>
@@ -84,10 +42,6 @@ else
     {
         ordersId = new List<int>();
         await LoadOrders();
-    }
-    private async Task GetUser(string userId)
-    {
-        //var user = await teamsUserCredential.
     }
     private async Task CloseOrder(OrderModel order)
     {

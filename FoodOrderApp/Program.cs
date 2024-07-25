@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Components.WebAssembly.Authentication;
 using Microsoft.Graph;
 using Microsoft.Identity.Web;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
+using Microsoft.TeamsFx;
+using Microsoft.Graph.Models.ExternalConnectors;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers()
@@ -16,8 +18,13 @@ builder.Services.AddControllers()
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
-builder.Services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)
-    .AddMicrosoftIdentityWebApp(builder.Configuration.GetSection("AzureAd"));
+builder.Services.AddMsalAuthentication(options =>
+{
+    var azureAd = builder.Configuration.GetSection("AzureAd");
+    options.ProviderOptions.Authentication.Authority = $"{azureAd["Instance"]}{azureAd["TenantId"]}";
+    options.ProviderOptions.Authentication.ClientId = azureAd["ClientId"];
+    options.ProviderOptions.DefaultAccessTokenScopes.Add("https://graph.microsoft.com/.default");
+});
 
 var config = builder.Configuration.Get<ConfigOptions>();
 builder.Services.AddTeamsFx(config.TeamsFx.Authentication);
@@ -36,6 +43,10 @@ builder.Services.AddHttpClient("FoodOrderApi", client =>
 {
     client.BaseAddress = new Uri("https://localhost:7230/");
 });
+/*builder.Services.AddHttpClient("GraphApi", client =>
+{
+    client.BaseAddress = new Uri("https://graph.microsoft.com/v1.0/");
+});*/
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddAntiforgery(o => o.SuppressXFrameOptionsHeader = true);
 
