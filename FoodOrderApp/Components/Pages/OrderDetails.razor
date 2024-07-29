@@ -1,6 +1,9 @@
 ﻿@using FoodOrderApp.Models
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.Graph
 @inject IHttpClientFactory HttpClientFactory
 @inject IDialogService DialogService
+@inject IToastService ToastService
 
 <h3>OrderDetails</h3>
 @if (Order == null)
@@ -15,22 +18,22 @@ else
     }
     <p>Zamawiający: @Order.Orderer</p>
     <p>Restauracja: @Order.RestaurantName</p>
-    <p>Minimalna wartość zamówienia: @Order.MinCost</p>
-    <p>Aktualna wartość zamówienia: @Order.CurrentCost</p>
+    <p>Minimalna wartość zamówienia: @Order.MinCost zł</p>
+    <p>Aktualna wartość zamówienia: @Order.CurrentCost zł</p>
     @if (Order.MinCost - Order.CurrentCost > 0)
     {
-        <p>Aby można było zamówić brakuje: @(Math.Round((decimal)(Order.MinCost - Order.CurrentCost), 2))</p>
+        <p>Aby można było zamówić brakuje: @(Math.Round((decimal)(Order.MinCost - Order.CurrentCost), 2)) zł</p>
     }
     else
     {
-        <p>Masz do zapłaty: @Cost</p>
+        <p>Masz do zapłaty: @Cost zł</p>
     }
     @if (Order.MinCostForFreeDelivery != null)
     {
         if (Order.MinCostForFreeDelivery - Order.CurrentCost > 0)
         {
-            <p>Opłata za dowóz: @Order.DeliveryFee</p>
-            <p>Do darmowej dostawy brakuje: @(Order.MinCostForFreeDelivery - Order.CurrentCost)</p>
+            <p>Opłata za dowóz: @Order.DeliveryFee zł</p>
+            <p>Do darmowej dostawy brakuje: @(Order.MinCostForFreeDelivery - Order.CurrentCost) zł</p>
         }
         else
         {
@@ -44,17 +47,14 @@ else
         if (Order.IsClosed)
         {
             <FluentButton OnClick="@(e => OpenOrder())">Otwórz ponownie zamówienie</FluentButton>
+            <FluentButton OnClick="DeleteOrder">Usuń zamówienie</FluentButton>
         }
         else
         {
             <FluentButton OnClick="@(e => CloseOrder())">Zamknij zamówienie</FluentButton>
         }
     }
-
-
     <OrderPositions OrderId="@OrderId" UserId="@UserId" IsClosed="@Order.IsClosed" OrdererId="@Order.Orderer" Parent="@this"/>
-
-    
 }
 @code {
     [Parameter]
@@ -84,12 +84,20 @@ else
     private async Task CloseOrder()
     {
         var httpClient = HttpClientFactory.CreateClient("FoodOrderApi");
-        var orders = await httpClient.PutAsJsonAsync($"api/OrderModels/{OrderId}/ChangeState/true", Order);
+        var response = await httpClient.PutAsJsonAsync($"api/OrderModels/{OrderId}/ChangeState/true", Order);
+        if (response.IsSuccessStatusCode)
+        {
+            await ReLoadOrder();
+        }
     }
     private async Task OpenOrder()
     {
         var httpClient = HttpClientFactory.CreateClient("FoodOrderApi");
-        var orders = await httpClient.PutAsJsonAsync($"api/OrderModels/{OrderId}/ChangeState/false", Order);
+        var response = await httpClient.PutAsJsonAsync($"api/OrderModels/{OrderId}/ChangeState/false", Order);
+        if (response.IsSuccessStatusCode)
+        {
+            await ReLoadOrder();
+        }
     }
     private async Task EditAsync()
     {
@@ -113,13 +121,20 @@ else
     }
     private async Task UpdateOrder(OrderModel order)
     {
-        var httpclient = HttpClientFactory.CreateClient("FoodOrderApi");
-        var result = await httpclient.PutAsJsonAsync($"api/OrderModels/{order.Id}", order);
+        var httpClient = HttpClientFactory.CreateClient("FoodOrderApi");
+        var result = await httpClient.PutAsJsonAsync($"api/OrderModels/{order.Id}", order);
     }
     private async Task GetCost()
     {
         var httpClient = HttpClientFactory.CreateClient("FoodOrderApi");
         var ordersCost = await httpClient.GetFromJsonAsync<double>($"api/OrderModels/{OrderId}/GetUserCostForOrder/{UserId}");
         Cost = Math.Round(ordersCost, 2);
+    }
+    private async Task DeleteOrder()
+    {
+        var httpClient = HttpClientFactory.CreateClient("FoodOrderApi");
+        var response = await httpClient.DeleteAsync($"api/OrderModels/{OrderId}");
+        if(response.IsSuccessStatusCode)
+            ToastService.ShowSuccess("Usunięto zamówienie.", 5000);
     }
 }

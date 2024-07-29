@@ -2,12 +2,12 @@ using FoodOrderApp;
 using FoodOrderApp.Components;
 using FoodOrderApp.Interop.TeamsSDK;
 using Microsoft.Fast.Components.FluentUI;
-using Microsoft.AspNetCore.Components.WebAssembly.Authentication;
 using Microsoft.Graph;
 using Microsoft.Identity.Web;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.TeamsFx;
 using Microsoft.Graph.Models.ExternalConnectors;
+using BlazorSample;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers()
@@ -25,12 +25,15 @@ builder.Services.AddMsalAuthentication(options =>
     options.ProviderOptions.Authentication.ClientId = azureAd["ClientId"];
     options.ProviderOptions.DefaultAccessTokenScopes.Add("https://graph.microsoft.com/.default");
 });
+builder.Services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)
+    .AddMicrosoftIdentityWebApp(builder.Configuration.GetSection("AzureAd"));
 
 var config = builder.Configuration.Get<ConfigOptions>();
 builder.Services.AddTeamsFx(config.TeamsFx.Authentication);
 
 builder.Services.AddScoped<MicrosoftTeams>();
 builder.Services.AddScoped<DialogService>();
+builder.Services.AddScoped<ToastService>();
 builder.Services.AddFluentUIComponents();
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor()
@@ -41,14 +44,16 @@ builder.Services.AddControllers();
 //builder.Services.AddHttpClient("WebClient", client => client.Timeout = TimeSpan.FromSeconds(600));
 builder.Services.AddHttpClient("FoodOrderApi", client =>
 {
-    client.BaseAddress = new Uri("https://localhost:7230/");
+    client.BaseAddress = new Uri("https://foodorderapi20240728140851.azurewebsites.net/");
 });
-/*builder.Services.AddHttpClient("GraphApi", client =>
-{
-    client.BaseAddress = new Uri("https://graph.microsoft.com/v1.0/");
-});*/
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddAntiforgery(o => o.SuppressXFrameOptionsHeader = true);
+
+var baseUrl = builder.Configuration.GetSection("MicrosoftGraph")["BaseUrl"];
+var scopes = builder.Configuration.GetSection("MicrosoftGraph:Scopes")
+    .Get<List<string>>();
+
+builder.Services.AddGraphClient(baseUrl, scopes);
 
 var app = builder.Build();
 

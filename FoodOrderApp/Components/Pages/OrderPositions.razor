@@ -5,6 +5,7 @@
 @inject TeamsUserCredential teamsUserCredential
 @inject IHttpClientFactory HttpClientFactory
 @inject IDialogService DialogService
+@inject IToastService ToastService
 <FluentAccordion>
     @if (!IsClosed)
     {
@@ -98,6 +99,7 @@
     private List<OrderPositionModel> orderPositions;
     public OrderPositionModel position = new OrderPositionModel();
 
+
     protected override async Task OnInitializedAsync()
     {
         await LoadPositions();
@@ -123,7 +125,7 @@
         response.EnsureSuccessStatusCode();
 
         var jsonResponse = await response.Content.ReadAsStringAsync();
-        
+
         orderPositions = JsonConvert.DeserializeObject<List<OrderPositionModel>>(jsonResponse);
     }
     private async Task LoadUserPositions()
@@ -153,22 +155,28 @@
         if (response.IsSuccessStatusCode)
         {
             position = new OrderPositionModel();
+            ToastService.ShowSuccess("Dodano pozycje do zamówienia.",500);
         }
-        
+
         await LoadPositions();
     }
     private async Task DeletePosition(int positionId)
     {
         var httpClient = HttpClientFactory.CreateClient("FoodOrderApi");
         var respone = await httpClient.DeleteAsync($"api/OrderPosition/{positionId}");
-        await LoadPositions();
+        if (respone.IsSuccessStatusCode)
+        {
+            ToastService.ShowSuccess("Usunięto pozycje z zamówienia.",500);
+            await LoadPositions();
+        }
     }
     private async Task AddComment(int positionId, OrderPositionModel position)
     {
         position.Comment = Comment;
         var httpClient = HttpClientFactory.CreateClient("FoodOrderApi");
         var response = await httpClient.PutAsJsonAsync($"api/OrderPosition", position);
-        await LoadPositions();
+        if(response.IsSuccessStatusCode)
+            await LoadPositions();
     }
     /*private async Task GetUserInfo(string userId)
         {
