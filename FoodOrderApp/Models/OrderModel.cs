@@ -7,6 +7,7 @@ namespace FoodOrderApp.Models
         [Key]
         public int? Id { get; set; }
         public string Orderer { get; set; }
+        public string OrdererName { get; set; }
         [Required(ErrorMessage ="Nazwa restauracji jest wymagana!")]
         [StringLength(100,
             MinimumLength =1, ErrorMessage = "")]

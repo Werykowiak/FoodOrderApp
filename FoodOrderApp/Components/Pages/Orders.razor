@@ -3,7 +3,7 @@
 @inject TeamsUserCredential teamsUserCredential
 @inject IDialogService DialogService
 <h3>Zamowienia</h3>
-<button @onclick="ReLoadOrders">Odśwież</button>
+<FluentButton Appearance="Appearance.Accent" OnClick="ReLoadOrders">Odśwież</FluentButton>
 @if (ordersId == null)
 {
     <p>Ładowanie</p>

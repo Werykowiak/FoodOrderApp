@@ -49,18 +49,18 @@
 
 @code {
     [Parameter]
-    public string UserId { get; set; }
-    private Microsoft.Graph.Models.User? user;
+    public UserInfo User { get; set; }
     public OrderModel order = new OrderModel();
 
     protected override async Task OnInitializedAsync()
     {
-        //user = await Client.Me.GetAsync();
+
     }
     private async Task SubmitOrder()
     {
         //order.Orderer = user.Id;
-        order.Orderer = UserId;
+        order.Orderer = User.ObjectId;
+        order.OrdererName = User.DisplayName;
         var httpClient = HttpClientFactory.CreateClient("FoodOrderApi");
         var response = await httpClient.PostAsJsonAsync("api/OrderModels", order);
         //response = await httpClient.GetAsync("api/OrderModels");

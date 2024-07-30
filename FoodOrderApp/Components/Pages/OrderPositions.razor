@@ -25,7 +25,7 @@
                     Koszt:
                     <InputNumber @bind-Value="position.Cost" />
                 </div>
-                <FluentButton Type="ButtonType.Submit">Dodaj Pozycję</FluentButton>
+                <FluentButton Appearance="Appearance.Accent" Type="ButtonType.Submit">Dodaj Pozycję</FluentButton>
             </EditForm>
         </FluentAccordionItem>
     } 
@@ -40,62 +40,9 @@
         }
         else
         {
-            @foreach (OrderPositionModel position in orderPositions)
+            @foreach (int? positionId in orderPositions)
             {
-                <OrderPositionDetails OrdererId="@OrdererId" PositionId="position.Id" UserId="@UserId" IsClosed="IsClosed" Parent="@this"/>
-                @* <hr />
-                if(UserId == position.UserId)
-                {
-                    <FluentButton Appearance="Appearance.Accent" OnClick="@(e=>EditAsync(position))">Edit</FluentButton>
-                }
-                <p>Uzytkownik: @position.UserId</p>
-                <p>Tresc zamowienia: @position.Position</p>
-                if (position.Additives != null)
-                {
-                    <p>Dodatki: @position.Additives</p>
-                }
-                <p>Koszt: @position.Cost</p>
-                if (@position.IsPaid)
-                {
-                    <p style ="color:green">Opłacone</p>
-                }
-                else
-                {
-                    <p style="color:red">Nieopłacone</p>
-                }
-                if (position.Comment != null)
-                {
-                    if (UserId == OrdererId)
-                    {
-                        <p>Komentarz: @position.Comment</p>
-                        <FluentButton OnClick="@(async e=> await DeleteComment((int)position.Id))">Usuń komentarz</FluentButton>
-                    }
-                    else if (UserId == position.UserId)
-                    {
-                        <p>Komentarz: @position.Comment</p>
-                    }
-                    //TODO usuwanie i edycja komentarza
-                }
-                
-                if (UserId == OrdererId && position.Comment == null)
-                {
-                   <AddComment PositionId="(int)position.Id"/>
-                }
-                @if (UserId == OrdererId)
-                {
-                    if (position.IsPaid)
-                    {
-                        <FluentButton OnClick="@(async e => await SetAsUnpaid(position))">Oznacz jako nie zapłacone</FluentButton>
-                    }
-                    else
-                    {
-                        <FluentButton OnClick="@(async e => await SetAsPaid(position))">Oznacz jako zapłacone</FluentButton>
-                    }
-                }
-                if (UserId == position.UserId && !IsClosed)
-                {
-                    <FluentButton OnClick="@(async e => await DeletePosition((int)position.Id))">Usuń pozycje</FluentButton>
-                } *@
+                <OrderPositionDetails OrdererId="@OrdererId" PositionId="positionId" UserId="@UserId" IsClosed="IsClosed" Parent="@this"/>
             }
         }
     </FluentAccordionItem>
@@ -115,7 +62,7 @@
     [Parameter]
     public OrderDetails Parent { get; set; }
     public string? Comment;
-    private List<OrderPositionModel> orderPositions;
+    private List<int?> orderPositions;
     public OrderPositionModel position = new OrderPositionModel();
 
 
@@ -144,14 +91,14 @@
         var response = await httpClient.GetAsync($"api/OrderPosition/{OrderId}");
         if (response.StatusCode == HttpStatusCode.NoContent)
         {
-            orderPositions = new List<OrderPositionModel>();
+            orderPositions = new List<int?>();
             return;
         }
         response.EnsureSuccessStatusCode();
 
         var jsonResponse = await response.Content.ReadAsStringAsync();
 
-        orderPositions = JsonConvert.DeserializeObject<List<OrderPositionModel>>(jsonResponse);
+        orderPositions = JsonConvert.DeserializeObject<List<int?>>(jsonResponse);
     }
     private async Task LoadUserPositions()
     {
@@ -160,102 +107,36 @@
         var response = await httpClient.GetAsync($"api/OrderPosition/{OrderId}/GetUserPositionsForOrder/{UserId}");
         if (response.StatusCode == HttpStatusCode.NoContent)
         {
-            orderPositions = new List<OrderPositionModel>();
+            orderPositions = new List<int?>();
             return;
         }
         response.EnsureSuccessStatusCode();
 
         var jsonResponse = await response.Content.ReadAsStringAsync();
 
-        orderPositions = JsonConvert.DeserializeObject<List<OrderPositionModel>>(jsonResponse);
+        orderPositions = JsonConvert.DeserializeObject<List<int?>>(jsonResponse);
     }
     private async Task SubmitPosition()
     {
         position.UserId = UserId;
         position.OrderId = (int)OrderId;
         //Console.WriteLine(orderId);
-        var httpClient = HttpClientFactory.CreateClient("FoodOrderApi");
-        var response = await httpClient.PostAsJsonAsync("api/OrderPosition", position);
-        //await LoadPositions();
-        if (response.IsSuccessStatusCode)
+        try
         {
-            position = new OrderPositionModel();
-            ToastService.ShowSuccess("Dodano pozycje do zamówienia.",500);
-        }
-
-        await LoadPositions();
-    }
-    private async Task DeletePosition(int positionId)
-    {
-        var httpClient = HttpClientFactory.CreateClient("FoodOrderApi");
-        var respone = await httpClient.DeleteAsync($"api/OrderPosition/{positionId}");
-        if (respone.IsSuccessStatusCode)
-        {
-            ToastService.ShowSuccess("Usunięto pozycje z zamówienia.",500);
-            await LoadPositions();
-        }
-    }
-    private async Task AddComment(int positionId, OrderPositionModel position)
-    {
-        position.Comment = Comment;
-        var httpClient = HttpClientFactory.CreateClient("FoodOrderApi");
-        var response = await httpClient.PutAsJsonAsync($"api/OrderPosition", position);
-        if(response.IsSuccessStatusCode)
-            await LoadPositions();
-    }
-    /*private async Task GetUserInfo(string userId)
-        {
-        //var user = await teamsUserCredential.
-    }*/
-    private async Task SetAsPaid(OrderPositionModel position)
-    {
-        var httpClient = HttpClientFactory.CreateClient("FoodOrderApi");
-        var response = await httpClient.PutAsJsonAsync($"api/OrderPosition/{position.Id}/SetIsPaid/true", position);
-        await LoadPositions();
-    }
-    private async Task SetAsUnpaid(OrderPositionModel position)
-    {
-        var httpClient = HttpClientFactory.CreateClient("FoodOrderApi");
-        var response = await httpClient.PutAsJsonAsync($"api/OrderPosition/{position.Id}/SetIsPaid/false", position);
-        await LoadPositions();
-    }
-    private async Task EditAsync(OrderPositionModel position)
-    {
-
-        var data = new OrderPositionModel(position);
-
-        var dialog = await DialogService.ShowDialogAsync<EditPosition>(data, new DialogParameters()
+            var httpClient = HttpClientFactory.CreateClient("FoodOrderApi");
+            var response = await httpClient.PostAsJsonAsync("api/OrderPosition", position);
+            //await LoadPositions();
+            if (response.IsSuccessStatusCode)
             {
-                Height = "400px",
-                //Title = $"Edycja pozycji",
-                PreventDismissOnOverlayClick = false,
-                PreventScroll = true,
-            });
-
-        var result = await dialog.Result;
-        if (!result.Cancelled && result.Data != null)
-        {
-            var comment = position.Comment;
-            position = (OrderPositionModel)result.Data;
-            position.Comment = comment;
-            await UpdatePosition(position);
+                position = new OrderPositionModel();
+                ToastService.ShowSuccess("Dodano pozycje do zamówienia.", 500);
+                await LoadPositions();
+            }
+            else if (response.StatusCode == System.Net.HttpStatusCode.BadRequest)
+            {
+                ToastService.ShowError("Nie dodano pozycji. Zamówienie nie istnieje.", 500);
+            }    
         }
-
+        catch (Exception ex){}
     }
-    private async Task UpdatePosition(OrderPositionModel position)
-    {
-        var httpClient = HttpClientFactory.CreateClient("FoodOrderApi");
-        var response = await httpClient.PutAsJsonAsync($"api/OrderPosition/{position.Id}", position);
-        await LoadPositions();
-    }
-    private async Task DeleteComment(int positionId)
-    {
-        var httpClient = HttpClientFactory.CreateClient("FoodOrderApi");
-        var position = await httpClient.GetFromJsonAsync<OrderPositionModel>($"api/OrderPosition/{positionId}/GetById");
-        position.Comment = null;
-
-        var response = await httpClient.PutAsJsonAsync($"api/OrderPosition/{position.Id}", position);
-        await ReloadPositions();
-    }
-
 }

@@ -16,7 +16,7 @@ else
     {
         <FluentButton Appearance="Appearance.Accent" OnClick="@(e=>EditAsync())">Edit</FluentButton>
     }
-    <p>Zamawiający: @Order.Orderer</p>
+    <p>Zamawiający: @Order.OrdererName</p>
     <p>Restauracja: @Order.RestaurantName</p>
     <p>Minimalna wartość zamówienia: @Order.MinCost zł</p>
     <p>Aktualna wartość zamówienia: @Order.CurrentCost zł</p>
@@ -50,12 +50,12 @@ else
     {
         if (Order.IsClosed)
         {
-            <FluentButton OnClick="@(e => OpenOrder())">Otwórz ponownie zamówienie</FluentButton>
-            <FluentButton OnClick="DeleteOrder">Usuń zamówienie</FluentButton>
+            <FluentButton Appearance="Appearance.Accent" OnClick="@(e => OpenOrder())">Otwórz ponownie zamówienie</FluentButton>
+            <FluentButton Appearance="Appearance.Accent" OnClick="DeleteOrder">Usuń zamówienie</FluentButton>
         }
         else
         {
-            <FluentButton OnClick="@(e => CloseOrder())">Zamknij zamówienie</FluentButton>
+            <FluentButton Appearance="Appearance.Accent" OnClick="@(e => CloseOrder())">Zamknij zamówienie</FluentButton>
         }
     }
     <OrderPositions OrderId="@OrderId" UserId="@UserId" IsClosed="@Order.IsClosed" OrdererId="@Order.Orderer" Parent="@this"/>
