@@ -14,7 +14,7 @@
     <ValidationSummary />
     <div>
         Nazwa Restauracji:
-        <InputText @bind-Value="order.RestaurantName" />
+        <InputText @bind-Value="order.RestaurantName" Placeholder ="np. KFC"/>
         <ValidationMessage For="() => order.RestaurantName" />
     </div>
     <div>
@@ -28,7 +28,7 @@
         <ValidationMessage For="() => order.DeliveryFee" />
     </div>
     <div>
-        Darmowy dowóz od:
+        Darmowy dowóz od(opcjonalne):
         <InputNumber @bind-Value="order.MinCostForFreeDelivery" />
         <ValidationMessage For="() => order.MinCostForFreeDelivery" />
     </div>

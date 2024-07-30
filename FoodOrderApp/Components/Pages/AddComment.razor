@@ -1,13 +1,14 @@
 ﻿@using FoodOrderApp.Models
 @inject IHttpClientFactory HttpClientFactory
-<EditForm Model="@Model" OnSubmit="@PostComment" >
+<EditForm Model="@Model" >
     <FluentTextArea @bind-Value="Model.comment" />
-    <FluentButton Type="ButtonType.Submit">Dodaj komentarz</FluentButton>
+    <FluentButton OnClick="@PostComment">Dodaj komentarz</FluentButton>
 </EditForm>
 
 @code {
     [Parameter]
     public int PositionId { get; set; }
+
 
     private Comment? Model = new Comment();
     private async Task PostComment()

@@ -18,7 +18,7 @@
                     <InputText @bind-Value="position.Position" />
                 </div>
                 <div>
-                    Dodatki:
+                    Dodatki(opcjonalne):
                     <InputText @bind-Value="position.Additives" />
                 </div>
                 <div>
@@ -42,7 +42,8 @@
         {
             @foreach (OrderPositionModel position in orderPositions)
             {
-                <hr />
+                <OrderPositionDetails OrdererId="@OrdererId" PositionId="position.Id" UserId="@UserId" IsClosed="IsClosed" Parent="@this"/>
+                @* <hr />
                 if(UserId == position.UserId)
                 {
                     <FluentButton Appearance="Appearance.Accent" OnClick="@(e=>EditAsync(position))">Edit</FluentButton>
@@ -54,29 +55,47 @@
                     <p>Dodatki: @position.Additives</p>
                 }
                 <p>Koszt: @position.Cost</p>
-                if(UserId == position.UserId && position.Comment != null)
+                if (@position.IsPaid)
                 {
-                    <p>Komentarz: @position.Comment</p>
+                    <p style ="color:green">Opłacone</p>
                 }
-                if (UserId == position.UserId && !IsClosed)
+                else
                 {
-                    <button @onclick="@(e => DeletePosition((int)position.Id))">Usuń</button>
+                    <p style="color:red">Nieopłacone</p>
                 }
+                if (position.Comment != null)
+                {
+                    if (UserId == OrdererId)
+                    {
+                        <p>Komentarz: @position.Comment</p>
+                        <FluentButton OnClick="@(async e=> await DeleteComment((int)position.Id))">Usuń komentarz</FluentButton>
+                    }
+                    else if (UserId == position.UserId)
+                    {
+                        <p>Komentarz: @position.Comment</p>
+                    }
+                    //TODO usuwanie i edycja komentarza
+                }
+                
                 if (UserId == OrdererId && position.Comment == null)
                 {
-                   <AddComment PositionId="(int)position.Id" />
+                   <AddComment PositionId="(int)position.Id"/>
                 }
                 @if (UserId == OrdererId)
                 {
                     if (position.IsPaid)
                     {
-                        <FluentButton OnClick="@(e => SetAsUnpaid(position))">Oznacz jako nie zapłacone</FluentButton>
+                        <FluentButton OnClick="@(async e => await SetAsUnpaid(position))">Oznacz jako nie zapłacone</FluentButton>
                     }
                     else
                     {
-                        <FluentButton OnClick="@(e => SetAsPaid(position))">Oznacz jako zapłacone</FluentButton>
+                        <FluentButton OnClick="@(async e => await SetAsPaid(position))">Oznacz jako zapłacone</FluentButton>
                     }
                 }
+                if (UserId == position.UserId && !IsClosed)
+                {
+                    <FluentButton OnClick="@(async e => await DeletePosition((int)position.Id))">Usuń pozycje</FluentButton>
+                } *@
             }
         }
     </FluentAccordionItem>
@@ -103,6 +122,12 @@
     protected override async Task OnInitializedAsync()
     {
         await LoadPositions();
+    }
+    public async Task ReloadPositions()
+    {
+        await Parent.ReLoadOrder();
+        await LoadPositions();
+        this.StateHasChanged();
     }
     private async Task LoadPositions()
     {
@@ -223,4 +248,14 @@
         var response = await httpClient.PutAsJsonAsync($"api/OrderPosition/{position.Id}", position);
         await LoadPositions();
     }
+    private async Task DeleteComment(int positionId)
+    {
+        var httpClient = HttpClientFactory.CreateClient("FoodOrderApi");
+        var position = await httpClient.GetFromJsonAsync<OrderPositionModel>($"api/OrderPosition/{positionId}/GetById");
+        position.Comment = null;
+
+        var response = await httpClient.PutAsJsonAsync($"api/OrderPosition/{position.Id}", position);
+        await ReloadPositions();
+    }
+
 }

@@ -22,7 +22,7 @@ else
     <p>Aktualna wartość zamówienia: @Order.CurrentCost zł</p>
     @if (Order.MinCost - Order.CurrentCost > 0)
     {
-        <p>Aby można było zamówić brakuje: @(Math.Round((decimal)(Order.MinCost - Order.CurrentCost), 2)) zł</p>
+        <p style="color:red">Aby można było zamówić brakuje: @(Math.Round((decimal)(Order.MinCost - Order.CurrentCost), 2)) zł</p>
     }
     else
     {
@@ -33,12 +33,16 @@ else
         if (Order.MinCostForFreeDelivery - Order.CurrentCost > 0)
         {
             <p>Opłata za dowóz: @Order.DeliveryFee zł</p>
-            <p>Do darmowej dostawy brakuje: @(Order.MinCostForFreeDelivery - Order.CurrentCost) zł</p>
+            <p >Do darmowej dostawy brakuje: @(Order.MinCostForFreeDelivery - Order.CurrentCost) zł</p>
         }
         else
         {
-            <p>Dostawa jest darmowa</p>
+            <p style="color:green">Dostawa jest darmowa</p>
         }
+    }
+    else
+    {
+        <p>Opłata za dowóz: @Order.DeliveryFee zł</p>
     }
     <p>Numer telefonu zamawiającego: @Order.PhoneNumber</p>
     <p>Numer konta do zapłaty: @Order.AccountNumber</p>

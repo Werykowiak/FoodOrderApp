@@ -1,0 +1,177 @@
+﻿@using FoodOrderApp.Models
+@using System.Net
+@using Newtonsoft.Json
+
+@inject TeamsUserCredential teamsUserCredential
+@inject IHttpClientFactory HttpClientFactory
+@inject IDialogService DialogService
+@inject IToastService ToastService
+@if (Position != null)
+{
+    <hr />
+    @if (UserId == Position.UserId)
+    {
+        <FluentButton Appearance="Appearance.Accent" OnClick="@EditAsync">Edit</FluentButton>
+    }
+    <p>Uzytkownik: @Position.UserId</p>
+    <p>Tresc zamowienia: @Position.Position</p>
+    @if (Position.Additives != null)
+    {
+        <p>Dodatki: @Position.Additives</p>
+    }
+    <p>Koszt: @Position.Cost</p>
+    @if (Position.IsPaid)
+    {
+        <p style="color:green">Opłacone</p>
+    }
+    else
+    {
+        <p style="color:red">Nieopłacone</p>
+    }
+    @if (Position.Comment != null)
+    {
+        if (UserId == OrdererId)
+        {
+            <p>Komentarz: @Position.Comment</p>
+            <FluentButton OnClick="@DeleteComment">Usuń komentarz</FluentButton>
+        }
+        else if (UserId == Position.UserId)
+        {
+            <p>Komentarz: @Position.Comment</p>
+        }
+        //TODO usuwanie i edycja komentarza
+    }
+
+    @if (UserId == OrdererId && Position.Comment == null)
+    {
+        //<AddComment PositionId="(int)Position.Id" />
+        <EditForm Model="@Model">
+            <FluentTextArea @bind-Value="Model.comment" />
+            <FluentButton OnClick="@PostComment">Dodaj komentarz</FluentButton>
+        </EditForm>
+    }
+    @if (UserId == OrdererId)
+    {
+        if (Position.IsPaid)
+        {
+            <FluentButton OnClick="@SetAsUnpaid">Oznacz jako nie zapłacone</FluentButton>
+        }
+        else
+        {
+            <FluentButton OnClick="SetAsPaid">Oznacz jako zapłacone</FluentButton>
+        }
+    }
+    @if (UserId == Position.UserId && !IsClosed)
+    {
+        <FluentButton OnClick="@DeletePosition">Usuń pozycje</FluentButton>
+    }
+}
+
+
+@code {
+    [Parameter]
+    public int? PositionId{ get; set; }
+    [Parameter]
+    public string? UserId { get; set; }
+    [Parameter]
+    public string? OrdererId { get; set; }
+    [Parameter]
+    public bool IsClosed { get; set; }
+    [Parameter]
+    public OrderPositions Parent{ get; set; }
+
+    private Comment? Model = new Comment();
+    public OrderPositionModel Position { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadPosition();
+    }
+    private async Task LoadPosition()
+    {
+        var httpClient = HttpClientFactory.CreateClient("FoodOrderApi");
+        Position = await httpClient.GetFromJsonAsync<OrderPositionModel>($"api/OrderPosition/{PositionId}/GetById");
+    }
+    private async Task ReloadPosition()
+    {
+        await Parent.ReloadPositions();
+        await LoadPosition();
+        this.StateHasChanged();
+    }
+    private async Task DeleteComment()
+    {
+        var httpClient = HttpClientFactory.CreateClient("FoodOrderApi");
+        Position.Comment = null;
+
+        var response = await httpClient.PutAsJsonAsync($"api/OrderPosition/{Position.Id}", Position);
+        await ReloadPosition();
+    }
+    private async Task SetAsPaid()
+    {
+        var httpClient = HttpClientFactory.CreateClient("FoodOrderApi");
+        var response = await httpClient.PutAsJsonAsync($"api/OrderPosition/{Position.Id}/SetIsPaid/true", Position);
+        await ReloadPosition();
+    }
+    private async Task SetAsUnpaid()
+    {
+        var httpClient = HttpClientFactory.CreateClient("FoodOrderApi");
+        var response = await httpClient.PutAsJsonAsync($"api/OrderPosition/{Position.Id}/SetIsPaid/false", Position);
+        await ReloadPosition();
+    }
+    private async Task EditAsync()
+    {
+
+        var data = new OrderPositionModel(Position);
+
+        var dialog = await DialogService.ShowDialogAsync<EditPosition>(data, new DialogParameters()
+            {
+                Height = "400px",
+                //Title = $"Edycja pozycji",
+                PreventDismissOnOverlayClick = false,
+                PreventScroll = true,
+            });
+
+        var result = await dialog.Result;
+        if (!result.Cancelled && result.Data != null)
+        {
+            var comment = Position.Comment;
+            Position = (OrderPositionModel)result.Data;
+            Position.Comment = comment;
+            await UpdatePosition();
+        }
+
+    }
+    private async Task UpdatePosition()
+    {
+        var httpClient = HttpClientFactory.CreateClient("FoodOrderApi");
+        var response = await httpClient.PutAsJsonAsync($"api/OrderPosition/{Position.Id}", Position);
+        await ReloadPosition();
+    }
+    private async Task DeletePosition()
+    {
+        var httpClient = HttpClientFactory.CreateClient("FoodOrderApi");
+        var respone = await httpClient.DeleteAsync($"api/OrderPosition/{PositionId}");
+        if (respone.IsSuccessStatusCode)
+        {
+            ToastService.ShowSuccess("Usunięto pozycje z zamówienia.", 500);
+            //await LoadPositions();
+            await ReloadPosition();
+        }
+    }
+    
+    private async Task PostComment()
+    {
+        var httpClient = HttpClientFactory.CreateClient("FoodOrderApi");
+        var position = await httpClient.GetFromJsonAsync<OrderPositionModel>($"api/OrderPosition/{PositionId}/GetById");
+        position.Comment = Model.comment;
+
+        var response = await httpClient.PutAsJsonAsync($"api/OrderPosition/{PositionId}", position);
+        Model = new Comment();
+        await ReloadPosition();
+    }
+
+    public class Comment
+    {
+        public string comment;
+    }
+}
