@@ -28,7 +28,7 @@ else
     {
         <p>Masz do zapłaty: @Cost zł</p>
     }
-    @if (Order.MinCostForFreeDelivery != null)
+    @if (Order.MinCostForFreeDelivery != null || Order.MinCostForFreeDelivery != 0)
     {
         if (Order.MinCostForFreeDelivery - Order.CurrentCost > 0)
         {
@@ -121,12 +121,16 @@ else
             Order = (OrderModel)result.Data;
             await UpdateOrder(Order);
         }
-        await GetCost();
+       // await GetCost();
     }
     private async Task UpdateOrder(OrderModel order)
     {
         var httpClient = HttpClientFactory.CreateClient("FoodOrderApi");
         var result = await httpClient.PutAsJsonAsync($"api/OrderModels/{order.Id}", order);
+        if(result.IsSuccessStatusCode)
+            ToastService.ShowSuccess("Zaktualizowano.", 500);
+        else
+            ToastService.ShowError("Błąd.", 500);
     }
     private async Task GetCost()
     {

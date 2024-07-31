@@ -7,6 +7,7 @@ namespace FoodOrderApp.Models
         [Key]
         public int? Id { get; set; }
         public string UserId { get; set; }
+        public string UserName { get; set; }
         [Required(ErrorMessage ="Treść zamóienia jest wymagana!")]
         [StringLength(50)]
         public string Position { get; set; }
@@ -21,14 +22,15 @@ namespace FoodOrderApp.Models
         public OrderPositionModel() { }
         public OrderPositionModel(OrderPositionModel source)
         {
-            Id = source.Id;
-            UserId = source.UserId;
-            Position = source.Position;
-            Comment = source.Comment;
-            Additives = source.Additives;
-            Cost = source.Cost;
-            OrderId = source.OrderId;
-            IsPaid = source.IsPaid;
+            this.Id = source.Id;
+            this.UserId = source.UserId;
+            this.UserName = source.UserName;
+            this.Position = source.Position;
+            this.Comment = source.Comment;
+            this.Additives = source.Additives;
+            this.Cost = source.Cost;
+            this.OrderId = source.OrderId;
+            this.IsPaid = source.IsPaid;
         }
     }
 }

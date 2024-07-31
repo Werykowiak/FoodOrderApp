@@ -36,6 +36,7 @@ namespace FoodOrderApp.Models
         {
             this.Id = order.Id;
             this.Orderer = order.Orderer;
+            this.OrdererName = order.OrdererName;
             this.RestaurantName = order.RestaurantName;
             this.MinCost = order.MinCost;
             this.CurrentCost = order.CurrentCost;

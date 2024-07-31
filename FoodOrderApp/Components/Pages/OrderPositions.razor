@@ -118,7 +118,9 @@
     }
     private async Task SubmitPosition()
     {
-        position.UserId = UserId;
+        var user = await teamsUserCredential.GetUserInfoAsync();
+        position.UserId = user.ObjectId;
+        position.UserName = user.DisplayName;
         position.OrderId = (int)OrderId;
         //Console.WriteLine(orderId);
         try
