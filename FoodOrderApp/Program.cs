@@ -44,8 +44,8 @@ builder.Services.AddControllers();
 //builder.Services.AddHttpClient("WebClient", client => client.Timeout = TimeSpan.FromSeconds(600));
 builder.Services.AddHttpClient("FoodOrderApi", client =>
 {
-    //client.BaseAddress = new Uri("https://foodorderapi20240728140851.azurewebsites.net/");
-    client.BaseAddress = new Uri("https://localhost:7230/");
+    client.BaseAddress = new Uri("https://foodorderapi20240728140851.azurewebsites.net/");
+    //client.BaseAddress = new Uri("https://localhost:7230/");
 });
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddAntiforgery(o => o.SuppressXFrameOptionsHeader = true);
