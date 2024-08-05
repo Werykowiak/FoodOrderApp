@@ -1,7 +1,8 @@
 ﻿@using FoodOrderApp.Models
 @using System.Net
 @using Newtonsoft.Json
-
+@using Microsoft.AspNetCore.SignalR.Client
+@inject NavigationManager Navigation
 @inject TeamsUserCredential teamsUserCredential
 @inject IHttpClientFactory HttpClientFactory
 @inject IDialogService DialogService
@@ -64,11 +65,29 @@
     public string? Comment;
     private List<int?> orderPositions;
     public OrderPositionModel position = new OrderPositionModel();
-
+    private HubConnection hubConnection;
 
     protected override async Task OnInitializedAsync()
     {
         await LoadPositions();
+
+        hubConnection = new HubConnectionBuilder()
+            .WithUrl(Navigation.ToAbsoluteUri("https://localhost:7230/orderHub"))
+            .Build();
+        try
+        {
+            await hubConnection.StartAsync();
+            Console.WriteLine("SignalR connection started.");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Exception on starting connection: {ex.Message}");
+        }
+        hubConnection.On("ReceiveNewPosition", async () =>
+        {
+            Console.WriteLine("Received");
+            await ReloadPositions();
+        });
     }
     public async Task ReloadPositions()
     {
@@ -131,12 +150,12 @@
             if (response.IsSuccessStatusCode)
             {
                 position = new OrderPositionModel();
-                ToastService.ShowSuccess("Dodano pozycje do zamówienia.", 500);
+                ToastService.ShowSuccess("Dodano pozycje do zamówienia.");
                 await LoadPositions();
             }
             else if (response.StatusCode == System.Net.HttpStatusCode.BadRequest)
             {
-                ToastService.ShowError("Nie dodano pozycji. Zamówienie nie istnieje.", 500);
+                ToastService.ShowError("Nie dodano pozycji. Zamówienie nie istnieje.");
             }    
         }
         catch (Exception ex){}

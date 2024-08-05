@@ -2,7 +2,7 @@
     "$schema": "https://developer.microsoft.com/en-us/json-schemas/teams/v1.16/MicrosoftTeams.schema.json",
     "manifestVersion": "1.16",
     "version": "1.0.0",
-    "id": "37938a91-03d1-4f3d-96c7-57e0c9fb6bb0",
+    "id": "bb907816-fcd2-44b4-a7b5-4c81d288a7e7",
     "packageName": "com.microsoft.teams.extension",
     "developer": {
         "name": "Teams App, Inc.",
@@ -54,7 +54,7 @@
         "localhost:44302"
     ],
     "webApplicationInfo": {
-        "id": "a12ccb1d-1bcc-444a-ae04-d399cb64e6a2",
-        "resource": "api://localhost:44302/a12ccb1d-1bcc-444a-ae04-d399cb64e6a2"
+        "id": "952c9b72-d013-4bdb-9a73-d3cff5094250",
+        "resource": "api://localhost:44302/952c9b72-d013-4bdb-9a73-d3cff5094250"
     }
 }

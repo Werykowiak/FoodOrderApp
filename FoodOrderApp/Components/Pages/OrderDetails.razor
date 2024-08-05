@@ -1,9 +1,11 @@
 ﻿@using FoodOrderApp.Models
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.Graph
+@using Microsoft.AspNetCore.SignalR.Client
 @inject IHttpClientFactory HttpClientFactory
 @inject IDialogService DialogService
 @inject IToastService ToastService
+@inject NavigationManager Navigation
 
 <h3>OrderDetails</h3>
 @if (Order == null)
@@ -67,9 +69,11 @@ else
     public int OrderId { get; set; }
     public OrderModel Order { get; set; }
     private double Cost { get; set; }
+    private HubConnection hubConnection;
     protected override async Task OnInitializedAsync()
     {
         await LoadOrder();
+        
     }
     public async Task LoadOrder()
     {
@@ -128,9 +132,9 @@ else
         var httpClient = HttpClientFactory.CreateClient("FoodOrderApi");
         var result = await httpClient.PutAsJsonAsync($"api/OrderModels/{order.Id}", order);
         if(result.IsSuccessStatusCode)
-            ToastService.ShowSuccess("Zaktualizowano.", 500);
+            ToastService.ShowSuccess("Zaktualizowano.");
         else
-            ToastService.ShowError("Błąd.", 500);
+            ToastService.ShowError("Błąd.");
     }
     private async Task GetCost()
     {
@@ -143,6 +147,6 @@ else
         var httpClient = HttpClientFactory.CreateClient("FoodOrderApi");
         var response = await httpClient.DeleteAsync($"api/OrderModels/{OrderId}");
         if(response.IsSuccessStatusCode)
-            ToastService.ShowSuccess("Usunięto zamówienie.", 5000);
+            ToastService.ShowSuccess("Usunięto zamówienie.");
     }
 }

@@ -93,7 +93,7 @@
             var httpClient = HttpClientFactory.CreateClient("FoodOrderApi");
             Position = await httpClient.GetFromJsonAsync<OrderPositionModel>($"api/OrderPosition/{PositionId}/GetById");
         }
-        catch (Exception ex) { ToastService.ShowError("Wystąpił błąd.", 500); }
+        catch (Exception ex) { ToastService.ShowError("Wystąpił błąd."); }
     }
     private async Task ReloadPosition()
     {
@@ -110,7 +110,7 @@
 
             var response = await httpClient.PutAsJsonAsync($"api/OrderPosition/{Position.Id}", Position);
             if (!response.IsSuccessStatusCode)
-                ToastService.ShowError("Wystąpił błąd.", 500);
+                ToastService.ShowError("Wystąpił błąd.");
             else
                 await ReloadPosition();
         }
@@ -123,7 +123,7 @@
             var httpClient = HttpClientFactory.CreateClient("FoodOrderApi");
             var response = await httpClient.PutAsJsonAsync($"api/OrderPosition/{Position.Id}/SetIsPaid/true", Position);
             if (!response.IsSuccessStatusCode)
-                ToastService.ShowError("Wystąpił błąd.", 500);
+                ToastService.ShowError("Wystąpił błąd.");
             else
                 await ReloadPosition();
         }
@@ -136,7 +136,7 @@
             var httpClient = HttpClientFactory.CreateClient("FoodOrderApi");
             var response = await httpClient.PutAsJsonAsync($"api/OrderPosition/{Position.Id}/SetIsPaid/false", Position);
             if (!response.IsSuccessStatusCode)
-                ToastService.ShowError("Wystąpił błąd.", 500);
+                ToastService.ShowError("Wystąpił błąd.");
             else
                 await ReloadPosition();
         }
@@ -172,7 +172,7 @@
             var httpClient = HttpClientFactory.CreateClient("FoodOrderApi");
             var response = await httpClient.PutAsJsonAsync($"api/OrderPosition/{Position.Id}", Position);
             if (!response.IsSuccessStatusCode)
-                ToastService.ShowError("Wystąpił błąd.", 500);
+                ToastService.ShowError("Wystąpił błąd.");
             else
                 await ReloadPosition();
         }
@@ -186,12 +186,12 @@
             var respone = await httpClient.DeleteAsync($"api/OrderPosition/{PositionId}");
             if (respone.IsSuccessStatusCode)
             {
-                ToastService.ShowSuccess("Usunięto pozycje z zamówienia.", 500);
+                ToastService.ShowSuccess("Usunięto pozycje z zamówienia.");
                 await Parent.ReloadPositions();
             }
             else
             {
-                ToastService.ShowError("Błąd podczas usuwania.", 500);
+                ToastService.ShowError("Błąd podczas usuwania.");
             }
         }
         catch (Exception ex) { } 
@@ -210,7 +210,7 @@
                 await ReloadPosition();
             }
             else
-                ToastService.ShowError("Wystąpił błąd.", 500);
+                ToastService.ShowError("Wystąpił błąd.");
         }
         catch (Exception ex) { }
     }

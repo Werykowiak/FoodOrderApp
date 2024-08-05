@@ -1,4 +1,6 @@
 ﻿@using FoodOrderApp.Models
+@using Microsoft.AspNetCore.SignalR.Client
+@inject NavigationManager Navigation
 @inject IHttpClientFactory HttpClientFactory
 @inject TeamsUserCredential teamsUserCredential
 @inject IDialogService DialogService
@@ -29,9 +31,28 @@ else
     public string? UserId { get; set; }
     private List<int> ordersId;
     private double Cost { get; set; }
+    private HubConnection hubConnection;
     protected override async Task OnInitializedAsync()
     {
         await LoadOrders();
+
+        hubConnection = new HubConnectionBuilder()
+            .WithUrl(Navigation.ToAbsoluteUri("https://localhost:7230/orderHub"))
+            .Build();
+        try
+        {
+            await hubConnection.StartAsync();
+            Console.WriteLine("SignalR connection started.");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Exception on starting connection: {ex.Message}");
+        }
+        hubConnection.On("ReceiveOrdersChange", async () =>
+        {
+            Console.WriteLine("Received");
+            await ReLoadOrders();
+        });
     }
     private async Task LoadOrders()
     {
@@ -42,45 +63,6 @@ else
     {
         ordersId = new List<int>();
         await LoadOrders();
-    }
-    private async Task CloseOrder(OrderModel order)
-    {
-        var httpClient = HttpClientFactory.CreateClient("FoodOrderApi");
-        var orders = await httpClient.PutAsJsonAsync($"api/OrderModels/{order.Id}/ChangeState/true",order);
-    }
-    private async Task OpenOrder(OrderModel order)
-    {
-        var httpClient = HttpClientFactory.CreateClient("FoodOrderApi");
-        var orders = await httpClient.PutAsJsonAsync($"api/OrderModels/{order.Id}/ChangeState/false", order);
-    }
-    private async Task GetCost(int orderId)
-    {
-        var httpClient = HttpClientFactory.CreateClient("FoodOrderApi");
-        var ordersCost = await httpClient.GetFromJsonAsync<double>($"api/OrderModels/{orderId}/GetUserCostForOrder/{UserId}");
-        Cost = Math.Round(ordersCost,2);
-    }
-    private async Task EditAsync(OrderModel order)
-    {
-
-        var data = new OrderModel(order);
-
-        var dialog = await DialogService.ShowDialogAsync<EditOrder>(data, new DialogParameters()
-            {
-                Height = "400px",
-                //Title = $"Edycja pozycji",
-                PreventDismissOnOverlayClick = false,
-                PreventScroll = true,
-            });
-        var result = await dialog.Result;
-        if (!result.Cancelled && result.Data != null)
-        {
-            order = (OrderModel)result.Data;
-            await UpdateOrder(order);
-        }
-    }
-    private async Task UpdateOrder(OrderModel order)
-    {
-        var httpclient = HttpClientFactory.CreateClient("FoodOrderApi");
-        var result = await httpclient.PutAsJsonAsync($"api/OrderModels/{order.Id}",order);
+        this.StateHasChanged();
     }
 }

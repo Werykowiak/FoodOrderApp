@@ -43,7 +43,7 @@
         <ValidationMessage For="() => order.AccountNumber" />
     </div>
     <div>
-        <FluentButton Type="ButtonType.Submit">Stwórz zamówienie</FluentButton>
+        <FluentButton Appearance="Appearance.Accent" Type="ButtonType.Submit">Stwórz zamówienie</FluentButton>
     </div>
 </EditForm>
 
@@ -68,7 +68,11 @@
         if (response.IsSuccessStatusCode)
         {
             order = new OrderModel();
-            ToastService.ShowSuccess("Dodano zamówienie.",5000);
+            ToastService.ShowSuccess("Dodano zamówienie.");
+        }
+        else
+        {
+            ToastService.ShowError("Nie dodano zamówienia");
         }
     }
     
