@@ -73,7 +73,28 @@ else
     protected override async Task OnInitializedAsync()
     {
         await LoadOrder();
-        
+        hubConnection = new HubConnectionBuilder()
+            .WithUrl(Navigation.ToAbsoluteUri("https://localhost:7230/orderHub"))
+            .Build();
+        try
+        {
+            await hubConnection.StartAsync();
+            Console.WriteLine("SignalR connection started.");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Exception on starting connection: {ex.Message}");
+        }
+        hubConnection.On("ReceivePositionChange", async () =>
+        {
+            Console.WriteLine("Received");
+            await ReLoadOrder();
+        });
+        hubConnection.On("ReceiveOrderDetailChange", async () =>
+        {
+            Console.WriteLine("Received");
+            await ReLoadOrder();
+        });
     }
     public async Task LoadOrder()
     {
@@ -141,6 +162,7 @@ else
         var httpClient = HttpClientFactory.CreateClient("FoodOrderApi");
         var ordersCost = await httpClient.GetFromJsonAsync<double>($"api/OrderModels/{OrderId}/GetUserCostForOrder/{UserId}");
         Cost = Math.Round(ordersCost, 2);
+        this.StateHasChanged();
     }
     private async Task DeleteOrder()
     {

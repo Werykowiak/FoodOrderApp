@@ -1,7 +1,8 @@
 ﻿@using FoodOrderApp.Models
 @using System.Net
 @using Newtonsoft.Json
-
+@using Microsoft.AspNetCore.SignalR.Client
+@inject NavigationManager Navigation
 @inject TeamsUserCredential teamsUserCredential
 @inject IHttpClientFactory HttpClientFactory
 @inject IDialogService DialogService
@@ -81,10 +82,27 @@
 
     private Comment? Model = new Comment();
     public OrderPositionModel Position { get; set; }
-
+    private HubConnection hubConnection;
     protected override async Task OnInitializedAsync()
     {
         await LoadPosition();
+        hubConnection = new HubConnectionBuilder()
+            .WithUrl(Navigation.ToAbsoluteUri("https://localhost:7230/orderHub"))
+            .Build();
+        try
+        {
+            await hubConnection.StartAsync();
+            Console.WriteLine("SignalR connection started.");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Exception on starting connection: {ex.Message}");
+        }
+        hubConnection.On("ReceivePositionChange", async () =>
+        {
+            Console.WriteLine("Received");
+            await ReloadPosition();
+        });
     }
     private async Task LoadPosition()
     {

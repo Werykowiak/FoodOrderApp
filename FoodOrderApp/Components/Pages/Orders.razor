@@ -52,6 +52,7 @@ else
         {
             Console.WriteLine("Received");
             await ReLoadOrders();
+            await InvokeAsync(StateHasChanged);
         });
     }
     private async Task LoadOrders()

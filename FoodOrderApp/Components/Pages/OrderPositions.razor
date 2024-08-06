@@ -63,7 +63,8 @@
     [Parameter]
     public OrderDetails Parent { get; set; }
     public string? Comment;
-    private List<int?> orderPositions;
+    private List<int?> orderPositions = new List<int?>();
+
     public OrderPositionModel position = new OrderPositionModel();
     private HubConnection hubConnection;
 
@@ -83,7 +84,7 @@
         {
             Console.WriteLine($"Exception on starting connection: {ex.Message}");
         }
-        hubConnection.On("ReceiveNewPosition", async () =>
+        hubConnection.On("ReceivePositionChange", async () =>
         {
             Console.WriteLine("Received");
             await ReloadPositions();
@@ -91,22 +92,26 @@
     }
     public async Task ReloadPositions()
     {
-        await Parent.ReLoadOrder();
         await LoadPositions();
-        this.StateHasChanged();
+        await Parent.ReLoadOrder();
+        await InvokeAsync(StateHasChanged);
+
     }
     private async Task LoadPositions()
     {
-        await Parent.ReLoadOrder();
+
         if (OrdererId == UserId)
             await LoadAllPositions();
         else
             await LoadUserPositions();
+        //await Parent.ReLoadOrder();
+        this.StateHasChanged();
     }
     private async Task LoadAllPositions()
     {
+        Console.WriteLine("LoadingAll");
+        orderPositions = null;
         var httpClient = HttpClientFactory.CreateClient("FoodOrderApi");
-        //orderPositions = await httpClient.GetFromJsonAsync<List<OrderPositionModel>>($"api/OrderPosition/{OrderId}");
         var response = await httpClient.GetAsync($"api/OrderPosition/{OrderId}");
         if (response.StatusCode == HttpStatusCode.NoContent)
         {
@@ -118,10 +123,12 @@
         var jsonResponse = await response.Content.ReadAsStringAsync();
 
         orderPositions = JsonConvert.DeserializeObject<List<int?>>(jsonResponse);
+        Console.WriteLine(orderPositions.Count);
     }
     private async Task LoadUserPositions()
     {
-        //await Parent.ReLoadOrders();
+        Console.WriteLine("LoadingUser");
+        orderPositions = null;
         var httpClient = HttpClientFactory.CreateClient("FoodOrderApi");
         var response = await httpClient.GetAsync($"api/OrderPosition/{OrderId}/GetUserPositionsForOrder/{UserId}");
         if (response.StatusCode == HttpStatusCode.NoContent)
@@ -134,6 +141,7 @@
         var jsonResponse = await response.Content.ReadAsStringAsync();
 
         orderPositions = JsonConvert.DeserializeObject<List<int?>>(jsonResponse);
+        Console.WriteLine(orderPositions.Count);
     }
     private async Task SubmitPosition()
     {
