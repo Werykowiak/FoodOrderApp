@@ -104,11 +104,8 @@ else
     }
     public async Task ReLoadOrder()
     {
-        Order = new OrderModel();
-        var httpClient = HttpClientFactory.CreateClient("FoodOrderApi");
-        Order = await httpClient.GetFromJsonAsync<OrderModel>($"api/OrderModels/{OrderId}");
-        await GetCost();
-        this.StateHasChanged();
+        await LoadOrder();
+        await InvokeAsync(StateHasChanged);
     }
     private async Task CloseOrder()
     {
